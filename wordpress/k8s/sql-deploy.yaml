@@ -1,0 +1,64 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+  namespace: wordpress
+stringData:
+  MYSQL_DATABASE: wpdb
+  MYSQL_PASSWORD: password
+  MYSQL_USER: admin
+  MYSQL_RANDOM_ROOT_PASSWORD: "1"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mysql
+  name: mysql
+  namespace: wordpress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      volumes:
+        - name: db
+          hostPath:
+            path: /data/mysql
+            type: DirectoryOrCreate
+      containers:
+        - image: mysql
+          name: mysql
+          ports:
+            - containerPort: 3306
+          envFrom:
+            - secretRef:
+                name: mysql-secret
+          volumeMounts:
+            - name: db
+              mountPath: /var/lib/mysql
+status: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: wordpress
+spec:
+  selector:
+    app: mysql
+  type: ClusterIP
+  ports:
+    - name: mysql
+      protocol: TCP
+      port: 3306
+      targetPort: 3306

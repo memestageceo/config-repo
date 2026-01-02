@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -9,6 +10,6 @@ metadata:
   uid: 1eebe08a-dc00-40d3-9d82-8df0c47f5cbf
 spec:
   finalizers:
-  - kubernetes
+    - kubernetes
 status:
   phase: Active

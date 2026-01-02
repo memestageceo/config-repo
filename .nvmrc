@@ -1,0 +1,10 @@
+-- Mark this as a Kubernetes project
+vim.g.kubernetes_project = true
+
+-- Auto-detect K8s files
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+  pattern = "*.yaml",
+  callback = function()
+    vim.bo.filetype = "yaml.kubernetes"
+  end,
+})
