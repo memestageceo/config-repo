@@ -1,5 +1,55 @@
 # Kubernetes Troubleshooting Guide: WordPress & MySQL Connectivity
 
+> `wordpress` expects `mysql` on port 3306.
+> name of `db_host` === `service.name`
+
+## Common Issues & Solutions
+
+### Issue: "Error establishing database connection"
+
+**Checklist:**
+
+- [ ] MySQL service name matches `WORDPRESS_DB_HOST`
+- [ ] Both services in same namespace (or use FQDN)
+- [ ] MySQL port is 3306, not 80 or another port
+- [ ] Container exposes port 3306
+- [ ] Credentials match between WordPress and MySQL
+- [ ] MySQL pod is running and healthy
+- [ ] WordPress pod restarted after Secret changes
+
+### Issue: Wrong port configuration
+
+**Correct configuration:**
+
+```yaml
+# In deployment
+ports:
+  - containerPort: 3306
+
+# In service
+ports:
+  - port: 3306        # Port service listens on
+    targetPort: 3306  # Port container listens on
+```
+
+```bash
+❯ k exec deploy/wordpress -- printenv | grep DB
+WORDPRESS_DB_NAME=db
+WORDPRESS_DB_PASSWORD=examplepass
+WORDPRESS_DB_USER=exampleuser
+WORDPRESS_DB_HOST=db
+DB_PORT=tcp://10.96.143.38:3306
+DB_PORT_3306_TCP_ADDR=10.96.143.38
+DB_PORT_3306_TCP=tcp://10.96.143.38:3306
+DB_PORT_3306_TCP_PROTO=tcp
+DB_PORT_3306_TCP_PORT=3306
+DB_SERVICE_HOST=10.96.143.38
+DB_SERVICE_PORT=3306
+DB_SERVICE_PORT_HTTP=3306
+```
+
+---
+
 ## The Problem We Solved
 
 **Symptom**: WordPress showing "Error establishing database connection" with HTTP 500 errors
@@ -15,12 +65,6 @@ Always start by checking if your pods are actually running:
 ```bash
 kubectl get pods -n wordpress
 ```
-
-**What to look for:**
-
-- Are all pods in `Running` status?
-- Any pods in `CrashLoopBackOff`, `Error`, or `Pending`?
-- Check the `RESTARTS` column - high restart counts indicate problems
 
 **Our case**: Both pods were running, so the issue wasn't a crash - it was configuration.
 
@@ -63,6 +107,9 @@ kubectl logs -n wordpress deployment/mysql --tail=50
 Check what configuration the running pod actually has:
 
 ```bash
+# GET ENDPOINTS AND EXPECTED PORTS
+kubectl exec -n wordpress deployment/wordpress --printenv | grep DB
+
 kubectl exec -n wordpress deployment/wordpress -- printenv | grep WORDPRESS_DB
 ```
 
@@ -200,20 +247,6 @@ kubectl rollout status deployment/wordpress -n wordpress
 
 ---
 
-## Common Issues & Solutions
-
-### Issue: "Error establishing database connection"
-
-**Checklist:**
-
-- [ ] MySQL service name matches `WORDPRESS_DB_HOST`
-- [ ] Both services in same namespace (or use FQDN)
-- [ ] MySQL port is 3306, not 80 or another port
-- [ ] Container exposes port 3306
-- [ ] Credentials match between WordPress and MySQL
-- [ ] MySQL pod is running and healthy
-- [ ] WordPress pod restarted after Secret changes
-
 ### Issue: Service endpoint is `<none>`
 
 **Cause**: Service selector doesn't match any pods
@@ -238,51 +271,6 @@ Make sure they match exactly.
 
 - Both service and pods must be in same namespace, OR
 - Use fully qualified domain name: `mysql.wordpress.svc.cluster.local`
-
-### Issue: Wrong port configuration
-
-**Common mistakes:**
-
-- MySQL service port ≠ 3306
-- Container port ≠ 3306
-- targetPort doesn't match containerPort
-
-**Correct configuration:**
-
-```yaml
-# In deployment
-ports:
-  - containerPort: 3306
-
-# In service
-ports:
-  - port: 3306        # Port service listens on
-    targetPort: 3306  # Port container listens on
-```
-
----
-
-## Debugging Workflow Summary
-
-```
-1. Check pod status (kubectl get pods)
-   ↓
-2. Check logs (kubectl logs)
-   ↓
-3. Check environment variables (kubectl exec ... printenv)
-   ↓
-4. Verify services exist and are correct (kubectl get svc, describe svc)
-   ↓
-5. Check service endpoints (kubectl get endpoints)
-   ↓
-6. Verify Secret values match (kubectl get secret -o yaml)
-   ↓
-7. Test connectivity (kubectl exec ... nslookup/nc)
-   ↓
-8. Restart pods to reload config (kubectl rollout restart)
-```
-
----
 
 ## Best Practices for Development
 
@@ -336,72 +324,3 @@ Don't change everything at once:
 3. Deploy WordPress
 4. Check connectivity
 5. Debug one issue at a time
-
----
-
-## Useful Commands Reference
-
-```bash
-# View all resources in namespace
-kubectl get all -n wordpress
-
-# Describe any resource for detailed info
-kubectl describe pod <pod-name> -n wordpress
-kubectl describe svc <service-name> -n wordpress
-
-# Execute commands inside a pod
-kubectl exec -it deployment/wordpress -n wordpress -- bash
-
-# Port-forward to test locally
-kubectl port-forward svc/wordpress 8080:80 -n wordpress
-
-# View events (shows recent problems)
-kubectl get events -n wordpress --sort-by='.lastTimestamp'
-
-# Delete and recreate resources
-kubectl delete -f k8s/sql-deploy.yaml
-kubectl apply -f k8s/sql-deploy.yaml
-
-# Watch pod status in real-time
-kubectl get pods -n wordpress -w
-```
-
----
-
-## Learning Resources
-
-1. **Kubernetes DNS**: Understanding how service discovery works
-2. **ConfigMaps and Secrets**: Managing application configuration
-3. **Labels and Selectors**: How services find pods
-4. **Troubleshooting patterns**: Systematic debugging approach
-5. **MySQL Docker image docs**: Understanding environment variables
-
----
-
-## What You Learned
-
-By working through this issue, you now understand:
-
-✅ How to read pod logs to diagnose issues
-✅ How Kubernetes DNS and service discovery works
-✅ How environment variables are loaded from Secrets
-✅ Why pods need restarting after Secret changes
-✅ How to verify service-to-pod connectivity
-✅ The importance of matching namespaces
-✅ How to decode and compare Secret values
-✅ The systematic approach to debugging multi-service applications
-
-**Most importantly**: You learned the debugging process, not just the fix. This applies to any Kubernetes connectivity issue.
-
----
-
-## Next Steps to Build DevOps Skills
-
-1. **Practice the debugging workflow** on other apps
-2. **Set up monitoring** (Prometheus + Grafana) to catch issues early
-3. **Learn about health checks** (liveness/readiness probes)
-4. **Study network policies** for security
-5. **Explore Helm charts** for managing complex applications
-6. **Set up a local cluster** (kind/minikube) for safe experimentation
-
-Remember: Every error is a learning opportunity. The more you debug, the faster you'll recognize patterns!

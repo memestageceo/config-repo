@@ -1,9 +1,14 @@
+---
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+name: wordpress
 nodes:
   - role: control-plane
     extraPortMappings:
-      - containerPort: 30950
+      - containerPort: 30000
         hostPort: 8080
+    extraMounts:
+      - hostPath: ./data
+        containerPath: /home/data
   - role: worker
   - role: worker

@@ -1,64 +1,74 @@
 ---
+# https://kubernetes.io/docs/concepts/configuration/secret/
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mysql-secret
+  name: mysql
   namespace: wordpress
+type: Opaque
 stringData:
-  MYSQL_DATABASE: wpdb
-  MYSQL_PASSWORD: password
-  MYSQL_USER: admin
+  MYSQL_DATABASE: db
+  MYSQL_USER: exampleuser
+  MYSQL_PASSWORD: examplepass
   MYSQL_RANDOM_ROOT_PASSWORD: "1"
 
 ---
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: db
+  namespace: wordpress
   labels:
     app: mysql
-  name: mysql
-  namespace: wordpress
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: mysql
-  strategy: {}
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
   template:
     metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: mysql
       labels:
         app: mysql
     spec:
-      volumes:
-        - name: db
-          hostPath:
-            path: /data/mysql
-            type: DirectoryOrCreate
       containers:
-        - image: mysql
-          name: mysql
-          ports:
-            - containerPort: 3306
+        - name: mysql
+          image: mysql
           envFrom:
             - secretRef:
-                name: mysql-secret
-          volumeMounts:
-            - name: db
-              mountPath: /var/lib/mysql
-status: {}
-
+                name: mysql
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+          ports:
+            - containerPort: 3306
+              name: mysql-http
 ---
+# https://kubernetes.io/docs/concepts/services-networking/service/
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql
+  name: db
   namespace: wordpress
 spec:
   selector:
     app: mysql
   type: ClusterIP
   ports:
-    - name: mysql
-      protocol: TCP
+    - name: http
       port: 3306
       targetPort: 3306
+      protocol: TCP
+
+---
