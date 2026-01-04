@@ -38,6 +38,11 @@ spec:
       labels:
         app: mysql
     spec:
+      volumes:
+        - name: mysql-data
+          hostPath:
+            path: /home/data/mysql-data
+            type: DirectoryOrCreate
       containers:
         - name: mysql
           image: mysql
@@ -54,6 +59,9 @@ spec:
           ports:
             - containerPort: 3306
               name: mysql-http
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: mysql-data
 ---
 # https://kubernetes.io/docs/concepts/services-networking/service/
 apiVersion: v1

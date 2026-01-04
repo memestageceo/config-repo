@@ -9,6 +9,6 @@ nodes:
         hostPort: 8080
     extraMounts:
       - hostPath: ./data
-        containerPath: /home/data
+        containerPath: /home/ida/Apps/config-repo/wordpress/data
   - role: worker
   - role: worker

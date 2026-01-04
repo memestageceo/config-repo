@@ -27,6 +27,11 @@ spec:
       labels:
         app: wordpress
     spec:
+      volumes:
+        - name: wp-data
+          hostPath:
+            path: /home/data/wp-data
+            type: DirectoryOrCreate
       containers:
         - name: wordpress
           image: wordpress
@@ -42,6 +47,9 @@ spec:
               cpu: "2000m"
           ports:
             - containerPort: 80
+          volumeMounts:
+            - mountPath: /var/www/html
+              name: wp-data
 
 ---
 # https://kubernetes.io/docs/concepts/services-networking/service/
