@@ -1,5 +1,9 @@
 # Service ports in k8s
 
+> `targetPort` must equal `containerPort`
+
+`nodePort -> port -> targetPort = containerPort`
+
 ```mermaid
 graph TB
     subgraph "Pod Definition"
