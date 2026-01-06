@@ -1,4 +1,37 @@
 ---
+# PERSISTENT VOLUME
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+  labels:
+    type: local
+    app: mysql
+  annotations:
+    pv.beta.kubernetes.io/gid: "1234"
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/mysql"
+---
+# PERSISTENT VOLUME CLAIM
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: wordpress
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
 # https://kubernetes.io/docs/concepts/configuration/secret/
 apiVersion: v1
 kind: Secret
@@ -40,9 +73,8 @@ spec:
     spec:
       volumes:
         - name: mysql-data
-          hostPath:
-            path: /home/data/mysql-data
-            type: DirectoryOrCreate
+          persistentVolumeClaim:
+            claimName: mysql-pvc
       containers:
         - name: mysql
           image: mysql
