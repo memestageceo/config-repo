@@ -1,22 +1,11 @@
 ---
-# PERSISTENT VOLUME
-apiVersion: v1
-kind: PersistentVolume
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
 metadata:
-  name: mysql-pv
-  labels:
-    type: local
-    app: mysql
-  annotations:
-    pv.beta.kubernetes.io/gid: "1234"
-spec:
-  storageClassName: manual
-  capacity:
-    storage: 2Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data/mysql"
+  name: sql-storage
+provisioner: rancher.io/local-path
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
 ---
 # PERSISTENT VOLUME CLAIM
 apiVersion: v1
@@ -25,7 +14,7 @@ metadata:
   name: mysql-pvc
   namespace: wordpress
 spec:
-  storageClassName: manual
+  storageClassName: sql-storage
   accessModes:
     - ReadWriteOnce
   resources:
