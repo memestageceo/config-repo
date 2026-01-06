@@ -2,24 +2,12 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: sql-storage
+  name: fast
 provisioner: rancher.io/local-path
 reclaimPolicy: Retain
 volumeBindingMode: WaitForFirstConsumer
 ---
 # PERSISTENT VOLUME CLAIM
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-pvc
-  namespace: wordpress
-spec:
-  storageClassName: sql-storage
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
 ---
 # https://kubernetes.io/docs/concepts/configuration/secret/
 apiVersion: v1
@@ -35,56 +23,7 @@ stringData:
   MYSQL_RANDOM_ROOT_PASSWORD: "1"
 
 ---
-# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: db
-  namespace: wordpress
-  labels:
-    app: mysql
-spec:
-  selector:
-    matchLabels:
-      app: mysql
-  replicas: 1
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
-  template:
-    metadata:
-      annotations:
-        kubectl.kubernetes.io/default-container: mysql
-      labels:
-        app: mysql
-    spec:
-      volumes:
-        - name: mysql-data
-          persistentVolumeClaim:
-            claimName: mysql-pvc
-      containers:
-        - name: mysql
-          image: mysql
-          envFrom:
-            - secretRef:
-                name: mysql
-          resources:
-            requests:
-              cpu: 1000m
-              memory: 1Gi
-            limits:
-              cpu: 2000m
-              memory: 2Gi
-          ports:
-            - containerPort: 3306
-              name: mysql-http
-          volumeMounts:
-            - mountPath: /var/lib/mysql
-              name: mysql-data
----
-# https://kubernetes.io/docs/concepts/services-networking/service/
+# SERVICE must exist before Statefulset
 apiVersion: v1
 kind: Service
 metadata:
@@ -101,3 +40,55 @@ spec:
       protocol: TCP
 
 ---
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+  namespace: wordpress
+  labels:
+    app: mysql
+spec:
+  serviceName: db
+  replicas: 3
+  # update in reverse 3 to 0 to protect master
+  updateStrategy:
+    type: RollingUpdate # or onDelete
+  selector:
+    matchLabels:
+      app: mysql
+  volumeClaimTemplates:
+    - metadata:
+        name: mysql-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: fast
+        resources:
+          requests:
+            storage: 1Gi
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      terminationGracePeriodSeconds: 500
+      containers:
+        - name: mysql
+          image: mysql
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: mysql
+          resources:
+            requests:
+              cpu: "500m"
+              memory: 1Gi
+            limits:
+              cpu: "1000m"
+              memory: 2Gi
+          ports:
+            - containerPort: 3306
+              name: mysql-http
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: mysql-data
