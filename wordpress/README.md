@@ -27,3 +27,9 @@ This resulted in hours wasted. THANKS!
     ├── ns.yaml
     └── README.md
 ```
+
+---
+
+A PV can have a class, which is specified by setting the storageClassName attribute to the name of a StorageClass. A PV of a particular class can only be bound to PVCs requesting that class. A PV with no storageClassName has no class and can only be bound to PVCs that request no particular class.
+
+If the MutablePVNodeAffinity feature gate is enabled in your cluster, the .spec.nodeAffinity field of a PersistentVolume is mutable. This allows cluster administrators or external storage controller to update the node affinity of a PersistentVolume when the data is migrated, without interrupting the running pods.

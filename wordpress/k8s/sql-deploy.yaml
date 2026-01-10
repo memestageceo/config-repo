@@ -20,10 +20,52 @@ stringData:
   MYSQL_DATABASE: db
   MYSQL_USER: exampleuser
   MYSQL_PASSWORD: examplepass
-  MYSQL_RANDOM_ROOT_PASSWORD: "1"
+  MYSQL_ROOT_PASSWORD: rootpassword  # Fixed root password for replication
+  MYSQL_REPLICATION_USER: replicator
+  MYSQL_REPLICATION_PASSWORD: replicatorpass
 
 ---
-# SERVICE must exist before Statefulset
+# ConfigMap for MySQL master/slave configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+  namespace: wordpress
+data:
+  master.cnf: |
+    [mysqld]
+    server-id=1
+    log-bin=mysql-bin
+    binlog-format=ROW
+    gtid-mode=ON
+    enforce-gtid-consistency=ON
+  slave.cnf: |
+    [mysqld]
+    server-id=2
+    relay-log=relay-log-server
+    read-only=1
+    gtid-mode=ON
+    enforce-gtid-consistency=ON
+
+---
+# Headless service for StatefulSet (provides stable network identity)
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-headless
+  namespace: wordpress
+spec:
+  selector:
+    app: mysql
+  clusterIP: None  # Headless service
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+      protocol: TCP
+
+---
+# Regular service pointing to master (db-0) for WordPress connections
 apiVersion: v1
 kind: Service
 metadata:
@@ -32,9 +74,10 @@ metadata:
 spec:
   selector:
     app: mysql
+    statefulset.kubernetes.io/pod-name: db-0  # Only route to master
   type: ClusterIP
   ports:
-    - name: http
+    - name: mysql
       port: 3306
       targetPort: 3306
       protocol: TCP
@@ -49,11 +92,12 @@ metadata:
   labels:
     app: mysql
 spec:
-  serviceName: db
-  replicas: 3
-  # update in reverse 3 to 0 to protect master
+  serviceName: db-headless  # Use headless service
+  replicas: 2  # 1 master (db-0) + 1 slave (db-1)
+  # update in reverse to protect master
   updateStrategy:
-    type: RollingUpdate # or onDelete
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady  # Create pods in order
   selector:
     matchLabels:
       app: mysql
@@ -71,24 +115,146 @@ spec:
       labels:
         app: mysql
     spec:
-      terminationGracePeriodSeconds: 500
+      terminationGracePeriodSeconds: 30
+      initContainers:
+        # Init container to configure master or slave based on pod ordinal
+        - name: init-mysql
+          image: mysql:8.0
+          command:
+            - bash
+            - "-c"
+            - |
+              set -ex
+              # Generate server-id from pod ordinal (db-0 -> 1, db-1 -> 2, etc)
+              [[ $(hostname) =~ -([0-9]+)$ ]] || exit 1
+              ordinal=${BASH_REMATCH[1]}
+              echo "Pod ordinal: $ordinal"
+
+              # Copy appropriate config based on ordinal
+              if [[ $ordinal -eq 0 ]]; then
+                echo "Configuring as MASTER"
+                cp /mnt/config-map/master.cnf /mnt/conf.d/server.cnf
+              else
+                echo "Configuring as SLAVE"
+                cp /mnt/config-map/slave.cnf /mnt/conf.d/server.cnf
+                # Update server-id to be unique
+                echo "server-id=$((100 + $ordinal))" >> /mnt/conf.d/server.cnf
+              fi
+          volumeMounts:
+            - name: conf
+              mountPath: /mnt/conf.d
+            - name: config-map
+              mountPath: /mnt/config-map
       containers:
         - name: mysql
-          image: mysql
-          imagePullPolicy: Always
-          envFrom:
-            - secretRef:
-                name: mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_DATABASE
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_PASSWORD
+            - name: MYSQL_REPLICATION_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_REPLICATION_USER
+            - name: MYSQL_REPLICATION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: MYSQL_REPLICATION_PASSWORD
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - bash
+                  - "-c"
+                  - |
+                    set -ex
+                    # Wait for MySQL to be ready
+                    until mysql -uroot -p$MYSQL_ROOT_PASSWORD -e "SELECT 1"; do
+                      echo "Waiting for MySQL to start..."
+                      sleep 2
+                    done
+
+                    # Get pod ordinal
+                    [[ $(hostname) =~ -([0-9]+)$ ]] || exit 1
+                    ordinal=${BASH_REMATCH[1]}
+
+                    if [[ $ordinal -eq 0 ]]; then
+                      # MASTER: Create replication user
+                      mysql -uroot -p$MYSQL_ROOT_PASSWORD <<-EOSQL
+                        CREATE USER IF NOT EXISTS '$MYSQL_REPLICATION_USER'@'%' IDENTIFIED BY '$MYSQL_REPLICATION_PASSWORD';
+                        GRANT REPLICATION SLAVE ON *.* TO '$MYSQL_REPLICATION_USER'@'%';
+                        FLUSH PRIVILEGES;
+                    EOSQL
+                      echo "Master configured with replication user"
+                    else
+                      # SLAVE: Configure replication to master
+                      # Wait for master to be ready
+                      until mysql -h db-0.db-headless -uroot -p$MYSQL_ROOT_PASSWORD -e "SELECT 1"; do
+                        echo "Waiting for master (db-0) to be ready..."
+                        sleep 5
+                      done
+
+                      # Set up replication
+                      mysql -uroot -p$MYSQL_ROOT_PASSWORD <<-EOSQL
+                        STOP SLAVE;
+                        CHANGE MASTER TO
+                          MASTER_HOST='db-0.db-headless',
+                          MASTER_USER='$MYSQL_REPLICATION_USER',
+                          MASTER_PASSWORD='$MYSQL_REPLICATION_PASSWORD',
+                          MASTER_AUTO_POSITION=1;
+                        START SLAVE;
+                    EOSQL
+                      echo "Slave configured to replicate from db-0"
+                    fi
           resources:
             requests:
+              cpu: "250m"
+              memory: 512Mi
+            limits:
               cpu: "500m"
               memory: 1Gi
-            limits:
-              cpu: "1000m"
-              memory: 2Gi
           ports:
             - containerPort: 3306
-              name: mysql-http
+              name: mysql
           volumeMounts:
-            - mountPath: /var/lib/mysql
-              name: mysql-data
+            - name: mysql-data
+              mountPath: /var/lib/mysql
+            - name: conf
+              mountPath: /etc/mysql/conf.d
+          livenessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-uroot", "-p$MYSQL_ROOT_PASSWORD"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          readinessProbe:
+            exec:
+              command: ["mysql", "-uroot", "-p$MYSQL_ROOT_PASSWORD", "-e", "SELECT 1"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 1
+      volumes:
+        - name: conf
+          emptyDir: {}
+        - name: config-map
+          configMap:
+            name: mysql-config

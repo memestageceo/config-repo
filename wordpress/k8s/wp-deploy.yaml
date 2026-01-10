@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: wordpress
+  name: wp-secret
   namespace: wordpress
 type: Opaque
 stringData:
@@ -11,7 +11,50 @@ stringData:
   WORDPRESS_DB_USER: exampleuser
   WORDPRESS_DB_PASSWORD: examplepass
   WORDPRESS_DB_NAME: db
-
+# aditya=aditya.raj9191#
+---
+apiVersion: v1
+data:
+  WORDPRESS_HOME: http://localhost:30000
+  WORDPRESS_SITEURL: http://localhost:30000
+kind: ConfigMap
+metadata:
+  name: wp-config
+  namespace: wordpress
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: wp-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /data/mnt
+    type: DirectoryOrCreate
+  storageClassName: ""
+  claimRef:
+    name: wp-pvc
+    namespace: wordpress
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wp-pvc
+  namespace: wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: ""
+  volumeName: wp-pv
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -19,7 +62,7 @@ metadata:
   name: wordpress
   namespace: wordpress
 spec:
-  replicas: 3
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -35,15 +78,16 @@ spec:
     spec:
       volumes:
         - name: wp-data
-          hostPath:
-            path: /home/data/wp-data
-            type: DirectoryOrCreate
+          persistentVolumeClaim:
+            claimName: wp-pvc
       containers:
         - name: wordpress
           image: wordpress
           envFrom:
             - secretRef:
-                name: wordpress
+                name: wp-secret
+            - configMapRef:
+                name: wp-config
           resources:
             requests:
               memory: "1Gi"
