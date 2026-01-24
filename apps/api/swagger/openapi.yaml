@@ -1,0 +1,142 @@
+---
+openapi: 3.1.0
+
+info:
+  title: TODO ADHD
+  summary: A task manager for those with ADHD
+  description: REST API to manage TODO tasks and lists with easy interations from MCP clients
+  termsOfService: localhost:3000/api/terms-of-service
+  contact:
+    name: API Support
+    url: localhost:3000/contact
+    email: support@example.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.1
+servers:
+  - url: http://localhost:8081
+    description: The production API on this device
+    name: prism
+  - url: https://oasd8430b42a5c0.free.beeceptor.com
+    description: for beeceptor testing
+    name: beeceptor
+
+paths:
+  /todo:
+    post:
+      summary: Add a new todo
+      description: Add a new todo to your task list
+      operationId: addTodo
+      requestBody:
+        description: The todo to create
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Todo"
+      responses:
+        "201":
+          description: Created a new todo
+
+    get:
+      summary: Get all todos
+      description: Get all todos from the database
+      operationId: getTodos
+
+      responses:
+        "200":
+          description: Successfully got todos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todos"
+
+  /todo/{id}:
+    put:
+      summary: Update a todo
+      description: Edit and update a todo in the database
+      operationId: updateTodo
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The todo id
+          schema:
+            type: integer
+            minimum: 1
+
+      requestBody:
+        description: The todo to update
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Todo"
+      responses:
+        "204":
+          description: Updated the todo
+
+    get:
+      summary: Get a Todo
+      description: Get a todo from your task list
+      operationId: getTodo
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The todo id
+          schema:
+            type: integer
+            minimum: 1
+
+      responses:
+        "200":
+          description: Successfully got todo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Todo"
+
+components:
+  schemas:
+    Todos:
+      type: array
+      items:
+        $ref: "#/components/schemas/Todo"
+
+    Todo:
+      type: object
+      required:
+        - title
+        - status
+      properties:
+        uuid:
+          description: Unique id for the todo
+          type: string
+          format: uuid
+          readOnly: true # specifies field only in responses, not requests
+          example: 30cbfb7d-9afc-4a58-876d-83751780aa27
+        title:
+          description: Title for the todo
+          type: string
+          example: "Complete documentation"
+        status:
+          type: string
+          description: Status of the todo
+          example: done
+          enum:
+            - todo
+            - active
+            - done
+        tags:
+          $ref: "#/components/schemas/Tags"
+
+    Tags:
+      description: List of tags for todo
+      type: array
+      items:
+        type: string
+      example:
+        - work
+        - daily
