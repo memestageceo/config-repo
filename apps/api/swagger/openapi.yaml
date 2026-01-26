@@ -169,7 +169,7 @@ components:
 
   requestBodies:
     TodoBody:
-      description: The todo to create
+      description: Reesponse body with a Todo.
       content:
         application/json:
           schema:
@@ -276,7 +276,11 @@ components:
 
     Todo:
       type: object
-      description: This si a todo
+      description: |-
+        A single todo object contains a title and the status of the task.
+
+        These tasks are tagged to better organize your tasklist - `tags` provides the required information.
+
       required:
         - title
         - status
