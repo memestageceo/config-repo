@@ -1,0 +1,279 @@
+---
+openapi: 3.1.1
+
+info:
+  title: Todo API
+  version: 1.0.0
+  summary: A simple To-Do API to manage your tasks.
+  description: |
+    # To-Do API HAHAHA
+
+    Welcome to the To-Do API! This API allows you to manage tasks efficiently. Below is an overview of its features.
+
+    > **Note:** This is for demonstration purposes only.
+
+    ## Features
+
+    - **Create a Task**: Add a new to-do item with a title and description.
+    - **List Tasks**: Retrieve all your tasks.
+    - **Update Task**: Modify a task’s title, description, or status.
+    - **Delete Task**: Remove a task from the list.
+
+    ## Example
+
+    Here’s how you can create a new task:
+
+    ```bash
+    curl -X POST /tasks -d '{"title":"Buy milk"}' -H "Authorization: Bearer YOUR_API_KEY"
+    <details> <summary>See Example Response</summary>
+  contact:
+    name: API Support
+    email: support@todo.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://todo.com/terms/
+servers:
+  - url: http://localhost:4010
+    description: Local development server
+
+paths:
+  /tasks:
+    get:
+      summary: List all tasks
+      description: Retrieves all tasks from the database
+      responses:
+        200:
+          description: Successfuly lists all tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+              examples:
+                value:
+                  $ref: "#/components/examples/TaskListExample"
+        400:
+          $ref: "#/components/responses/ValidationError"
+        501:
+          $ref: "#/components/responses/ServerError"
+    post:
+      summary: Create a task
+      description: Creates a new task
+      requestBody:
+
+  /tasks/{id}:
+    get:
+      summary: Get task by uuid
+      description: Finds and returns a todo with the specified id
+      responses:
+        200:
+          description: Returns todo with the given UUID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+              examples:
+                activeTask:
+                  $ref: "#/components/examples/ActiveTaskExample"
+        400:
+          $ref: "#/components/responses/ValidationError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+        501:
+          $ref: "#/components/responses/ServerError"
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  responses:
+    ValidationError:
+      description: Bad Request
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+          examples:
+            validationError:
+              $ref: "#/components/examples/ValidationError"
+    UnauthorizedError:
+      description: Unauthorized
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+          examples:
+            unauthorizedError:
+              $ref: "#/components/examples/UnauthorizedError"
+    NotFoundError:
+      description: Not Found
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+          examples:
+            notFoundError:
+              $ref: "#/components/examples/NotFoundError"
+    ForbiddenError:
+      description: Forbidden
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+          examples:
+            forbiddenError:
+              $ref: "#/components/examples/ForbiddenError"
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+          examples:
+            tooManyRequests:
+              $ref: "#/components/examples/TooManyRequests"
+    ServerError:
+      description: Internal Server Error
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/ProblemDetails"
+          examples:
+            serverError:
+              $ref: "#/components/examples/ServerError"
+
+  schemas:
+    Task:
+      description: A to-do task
+      type: object
+      required:
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: fdsaf-fdsag-asfda
+        title:
+          type: string
+          description: title of the task
+          minLength: 3
+          maxLength: 25
+          example: Buy milk
+        details:
+          type: string
+          description: Details for the task
+          example: Tasks are neverending, so we must keep doing them if required. The faster we do them, the better.
+        status:
+          type: string
+          enum:
+            - todo
+            - active
+            - done
+          example: todo
+        createdAt:
+          type: string
+          format: date-time
+          description: Time of task creation
+          example: 2026-02-21T17:32:28Z
+      example:
+        id: fdsfsd-afdag-asdgfa
+        title: "let the dogs out"
+        details: Letting dogs out is important so that folks ask, who let the dogs out...who who who who
+        status: active
+        createdAt: 2026-02-02T11:32:28Z
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: fghhnv-agfdsag-fbvasw
+        username:
+          type: string
+          example: cusiamhigh
+          description: Username
+          minLength: 4
+          maxLength: 12
+        createdAt:
+          type: string
+          format: date-time
+          example: 2026-01-21T17:32:28Z
+    ProblemDetails:
+      type: object
+      description: RFC 9457 Problem Details
+      properties:
+        type:
+          type: string
+          format: uri-reference
+          default: about:blank
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+      additionalProperties: true # Allows extensions
+  examples:
+    # Response examples
+    ActiveTaskExample:
+      value:
+        id: fdsfsd-afdag-asdgfa
+        title: "let the dogs out"
+        details: Letting dogs out is important so that folks ask, who let the dogs out...who who who who
+        status: active
+        createdAt: 2026-02-02T11:32:28Z
+    TaskListExample:
+      value:
+        - id: fdsfsd-afdag-asdgfa
+          title: "let the dogs out"
+          details: Letting dogs out is important so that folks ask, who let the dogs out...who who who who
+          status: active
+          createdAt: 2026-02-02T11:32:28Z
+        - id: fdfbsz-afdag-asdgfa
+          title: "Buy Milk"
+          details: When at the grocery, buy milk pronto
+          status: done
+          createdAt: 2026-02-12T11:32:28Z
+    # Reusable problem examples
+    ValidationError:
+      value:
+        type: https://api.todo.com/problems/validation-error
+        title: Validation Error
+        status: 400
+        detail: Request validation failed
+    NotFoundError:
+      value:
+        title: Resource Not Found
+        status: 404
+        detail: Resource with the given ID not found.
+    ForbiddenError:
+      value:
+        type: https://example.com/errors/forbidden
+        title: Forbidden
+        status: 403
+        detail: You do not have permission to access this resource.
+    UnauthorizedError:
+      value:
+        type: https://example.com/errors/unauthorized
+        title: Unauthorized
+        status: 401
+        detail: Authentication is required and has failed or has not yet been provided.
+    TooManyRequests:
+      value:
+        type: https://example.com/errors/too-many-requests
+        title: Too Many Requests
+        status: 429
+        detail: You have sent too many requests in a given amount of time.
+    ServerError:
+      value:
+        type: https://example.com/errors/server-error
+        title: Internal Server Error
+        status: 500
+        detail: An unexpected error occurred on the server side.
