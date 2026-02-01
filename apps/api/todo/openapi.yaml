@@ -6,7 +6,7 @@ info:
   version: 1.0.0
   summary: A simple To-Do API to manage your tasks.
   description: |
-    # To-Do API HAHAHA
+    # To-Do API
 
     Welcome to the To-Do API! This API allows you to manage tasks efficiently. Below is an overview of its features.
 
@@ -26,6 +26,7 @@ info:
     ```bash
     curl -X POST /tasks -d '{"title":"Buy milk"}' -H "Authorization: Bearer YOUR_API_KEY"
     <details> <summary>See Example Response</summary>
+    ```
   contact:
     name: API Support
     email: support@todo.com
@@ -52,21 +53,52 @@ paths:
                 items:
                   $ref: "#/components/schemas/Task"
               examples:
-                value:
+                TaskListExample:
                   $ref: "#/components/examples/TaskListExample"
-        400:
-          $ref: "#/components/responses/ValidationError"
-        501:
+        # NOTE: 400 removed as can't have bad request when sending nothing in request.
+        # NOTE: 501 -> not implemented -> changed to 500.
+        500:
           $ref: "#/components/responses/ServerError"
     post:
       summary: Create a task
       description: Creates a new task
       requestBody:
+        description: Task item to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskCreate"
+            examples:
+              newTask:
+                $ref: "#/components/examples/NewTask"
+      responses:
+        "201":
+          description: Task created Successfuly
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+              examples:
+                newTaskCreated:
+                  $ref: "#/components/examples/NewTaskCreated"
+
+        400:
+          $ref: "#/components/responses/ValidationError"
+        403:
+          $ref: "#/components/responses/ForbiddenError"
+        429:
+          $ref: "#/components/responses/TooManyRequests"
+        500:
+          $ref: "#/components/responses/ServerError"
 
   /tasks/{id}:
+    parameters:
+      - $ref: "#/components/parameters/idParam"
     get:
       summary: Get task by uuid
       description: Finds and returns a todo with the specified id
+      operationId: getTask
       responses:
         200:
           description: Returns todo with the given UUID
@@ -77,11 +109,97 @@ paths:
               examples:
                 activeTask:
                   $ref: "#/components/examples/ActiveTaskExample"
-        400:
-          $ref: "#/components/responses/ValidationError"
         404:
           $ref: "#/components/responses/NotFoundError"
-        501:
+        500:
+          $ref: "#/components/responses/ServerError"
+    delete:
+      summary: Delete a task
+      description: Deletes task with the specified UUID.
+      responses:
+        # NOTE: no JSON return -> 204 No Content
+        200:
+          description: Deleted the task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+              examples:
+                activeTask:
+                  $ref: "#/components/examples/ActiveTaskExample"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+    put:
+      summary: Update a task
+      description: Edit multiple properties of a task
+      requestBody:
+        description: Task to update as JSON
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskCreate"
+            examples:
+              newTask:
+                $ref: "#/components/examples/NewTask"
+      responses:
+        200:
+          description: Task Updated Successfuly
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+              examples:
+                newTaskCreated:
+                  $ref: "#/components/examples/NewTaskCreated"
+
+        400:
+          $ref: "#/components/responses/ValidationError"
+        403:
+          $ref: "#/components/responses/ForbiddenError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+        429:
+          $ref: "#/components/responses/TooManyRequests"
+        500:
+          $ref: "#/components/responses/ServerError"
+
+    patch:
+      summary: Update a property of a task
+      description: Edit a property of a task
+      requestBody:
+        description: Task to update as JSON
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskPatch"
+            examples:
+              newTask:
+                $ref: "#/components/examples/NewTask"
+      responses:
+        200:
+          description: Task Updated Successfuly
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+              examples:
+                newTaskCreated:
+                  $ref: "#/components/examples/NewTaskCreated"
+
+        400:
+          $ref: "#/components/responses/ValidationError"
+        403:
+          $ref: "#/components/responses/ForbiddenError"
+        404:
+          $ref: "#/components/responses/NotFoundError"
+        429:
+          $ref: "#/components/responses/TooManyRequests"
+        500:
           $ref: "#/components/responses/ServerError"
 
 components:
@@ -89,6 +207,17 @@ components:
     basicAuth:
       type: http
       scheme: basic
+
+  parameters:
+    idParam: # <- arbitrary name
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: a2de43e2-a8f2-4385-b86e-a07c2962c639
+      description: UUID for a task
 
   responses:
     ValidationError:
@@ -147,51 +276,82 @@ components:
               $ref: "#/components/examples/ServerError"
 
   schemas:
-    Task:
-      description: A to-do task
+    TaskBase:
       type: object
-      required:
-        - title
       properties:
-        id:
-          type: string
-          format: uuid
-          example: fdsaf-fdsag-asfda
         title:
           type: string
-          description: title of the task
+          description: Title of the task
           minLength: 3
           maxLength: 25
-          example: Buy milk
         details:
           type: string
-          description: Details for the task
-          example: Tasks are neverending, so we must keep doing them if required. The faster we do them, the better.
+          description: Description of the task
+          default: ""
         status:
           type: string
-          enum:
-            - todo
-            - active
-            - done
-          example: todo
-        createdAt:
-          type: string
-          format: date-time
-          description: Time of task creation
-          example: 2026-02-21T17:32:28Z
+          description: Current status of task
+          enum: [todo, active, done]
+          default: todo
+    TaskCreate:
+      allOf:
+        - $ref: "#/components/schemas/TaskBase"
+        - type: object
+          required:
+            - title
+    Task:
+      allOf:
+        - $ref: "#/components/schemas/TaskBase"
+        - type: object
+          required:
+            - title
+            - id
+            - createdAt
+          properties:
+            id:
+              type: string
+              description: Unique ID of task
+              format: uuid
+              example: cbc600db-10de-4f18-a7cf-07299546ed4d
+              readOnly: true
+            createdAt:
+              type: string
+              format: date-time
+              description: Time of task creation
+              example: 2026-02-21T17:32:28Z
+              readOnly: true
       example:
-        id: fdsfsd-afdag-asdgfa
+        id: 0a8474b1-dabd-4731-9044-d0b23306e1d1
         title: "let the dogs out"
         details: Letting dogs out is important so that folks ask, who let the dogs out...who who who who
         status: active
         createdAt: 2026-02-02T11:32:28Z
+    TaskPatch:
+      type: object
+      minProperties: 1
+      properties:
+        title:
+          type: string
+          description: Title of the task
+          minLength: 3
+          maxLength: 25
+        details:
+          type: string
+          description: Description of the task
+          # default removed as we don't wanna override the existing details when not difining explicitly.
+        status:
+          type: string
+          description: Current status of task
+          enum: [todo, active, done]
+          default: todo
+
     User:
       type: object
       properties:
         id:
           type: string
           format: uuid
-          example: fghhnv-agfdsag-fbvasw
+          example: 35987b7e-9b36-4447-9a9c-b400c7fb1f57
         username:
           type: string
           example: cusiamhigh
@@ -208,7 +368,7 @@ components:
       properties:
         type:
           type: string
-          format: uri-reference
+          format: uri
           default: about:blank
         title:
           type: string
@@ -218,25 +378,36 @@ components:
           type: string
         instance:
           type: string
-          format: uri-reference
+          format: uri
       additionalProperties: true # Allows extensions
   examples:
     # Response examples
+    NewTask:
+      value:
+        title: "Create new repo"
+        details: A new repo is required for a new project. Duh!
+    NewTaskCreated:
+      value:
+        id: 82e95fbd-0f26-4d79-aa15-56ef559ea942
+        title: "Create new repo"
+        details: A new repo is required for a new project. Duh!
+        status: todo
+        createdAt: 2026-02-02T11:32:28Z
     ActiveTaskExample:
       value:
-        id: fdsfsd-afdag-asdgfa
+        id: a2de43e2-a8f2-4385-b86e-a07c2962c639
         title: "let the dogs out"
         details: Letting dogs out is important so that folks ask, who let the dogs out...who who who who
         status: active
         createdAt: 2026-02-02T11:32:28Z
     TaskListExample:
       value:
-        - id: fdsfsd-afdag-asdgfa
+        - id: 014d8284-85f1-4acd-a3cb-ed0e9bd30374
           title: "let the dogs out"
           details: Letting dogs out is important so that folks ask, who let the dogs out...who who who who
           status: active
           createdAt: 2026-02-02T11:32:28Z
-        - id: fdfbsz-afdag-asdgfa
+        - id: 18d07177-e98b-455b-90bf-2d01e58c369c
           title: "Buy Milk"
           details: When at the grocery, buy milk pronto
           status: done
