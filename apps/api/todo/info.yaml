@@ -1,0 +1,32 @@
+title: Todo API
+version: 1.0.0
+summary: A simple To-Do API to manage your tasks.
+description: |
+  # To-Do API
+
+  Welcome to the To-Do API! This API allows you to manage tasks efficiently. Below is an overview of its features.
+
+  > **Note:** This is for demonstration purposes only.
+
+  ## Features
+
+  - **Create a Task**: Add a new to-do item with a title and description.
+  - **List Tasks**: Retrieve all your tasks.
+  - **Update Task**: Modify a task’s title, description, or status.
+  - **Delete Task**: Remove a task from the list.
+
+  ## Example
+
+  Here’s how you can create a new task:
+
+  ```bash
+  curl -X POST /tasks -d '{"title":"Buy milk"}' -H "Authorization: Bearer YOUR_API_KEY"
+  <details> <summary>See Example Response</summary>
+  ```
+contact:
+  name: API Support
+  email: support@todo.com
+license:
+  name: MIT
+  url: https://opensource.org/licenses/MIT
+termsOfService: https://todo.com/terms/

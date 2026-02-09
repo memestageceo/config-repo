@@ -1,0 +1,42 @@
+---
+services:
+  swagger-editor:
+    image: docker.swagger.io/swaggerapi/swagger-editor:latest
+    environment:
+      - SWAGGER_FILE=/spec/openapi.yaml
+    volumes:
+      - .:/spec
+    ports:
+      - "8080:8080"
+
+  swagger-ui:
+    image: docker.swagger.io/swaggerapi/swagger-ui:latest
+    environment:
+      - SWAGGER_JSON=/spec/openapi.yaml
+    volumes:
+      - .:/spec
+    ports:
+      - 8083:8080
+
+  prism:
+    image: stoplight/prism:4
+    # -d for dynamic responses
+    command: "mock -h 0.0.0.0 /tmp/openapi.yaml"
+    volumes:
+      - ./openapi.yaml:/tmp/openapi.yaml:ro
+    ports:
+      # Serve the mocked API locally as available on port 8080
+      - "8081:4010"
+
+  api-reference:
+    image: scalarapi/api-reference:latest
+    ports:
+      - "8082:8080"
+    volumes:
+      # Mount your OpenAPI documents directory
+      - .:/docs
+    environment:
+      - SPEC_URL=/openapi/openapi.yaml
+      # Optional: Add theme configuration
+      # - API_REFERENCE_CONFIG={"theme": "purple"}
+    restart: unless-stopped
