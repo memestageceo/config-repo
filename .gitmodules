@@ -1,0 +1,3 @@
+[submodule "fast-k8s"]
+	path = fast-k8s
+	url = git@github.com:memestageceo/fast-k8s
