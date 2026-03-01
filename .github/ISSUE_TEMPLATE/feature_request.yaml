@@ -1,0 +1,45 @@
+name: "Feature / Enhancement"
+description: Propose a new config, resource, or improvement to an existing one.
+title: "[feat]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for new configs, Helm chart additions, Ansible roles, or structural improvements.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Kubernetes
+        - Helm
+        - Ansible
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: What's currently missing or painful?
+      placeholder: "We have no HPA config for the api deployment, so scaling is manual."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the change. Rough config snippets welcome.
+      placeholder: "Add an HPA manifest under k8s/base/api/ targeting 60% CPU."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional — other approaches you ruled out and why.
