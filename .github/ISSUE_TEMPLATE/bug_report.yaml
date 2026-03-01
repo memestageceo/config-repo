@@ -1,0 +1,67 @@
+name: "Bug Report"
+description: Something is broken or behaving unexpectedly in a config or deployment.
+title: "[bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report a misconfiguration, broken deployment, or unexpected behavior.
+        Keep it concise — what broke, where, and how to reproduce.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the repo is affected?
+      options:
+        - Kubernetes
+        - Helm
+        - Ansible
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: path
+    attributes:
+      label: Affected path
+      description: Folder or file where the issue lives.
+      placeholder: "e.g. k8s/overlays/production/"
+    validations:
+      required: true
+
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: What happened?
+      description: Describe the problem. Include any error messages or logs.
+      placeholder: "Deployment fails with: ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+      placeholder: "The pod should start and reach Running state."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Apply manifest at k8s/...
+        2. Run `kubectl get pods`
+        3. See error
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: Cluster, tool versions, or other relevant context.
+      placeholder: "k8s 1.29, Helm 3.14, minikube / GKE / etc."
