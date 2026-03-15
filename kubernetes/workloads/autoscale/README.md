@@ -1,7 +1,5 @@
 # Horizontal Pod Autoscaler
 
-## Quick command
-
 ```bash
 k autoscale deployment app --cpu=50% --min=1 --max=5
 ```
@@ -27,7 +25,6 @@ spec:
         target:
           type: Utilization
           averageUtilization: 50
-
 ```
 
 ## Other metric examples
