@@ -16,15 +16,18 @@ spec:
         app: fastapi-hpa
     spec:
       containers:
-      - image: noneofyabusiness/fastapi-hpa:1
-        name: fastapi-hpa
-        ports:
-          - containerPort: 8080
-        resources: 
-          requests:
-            cpu: 100m
-          limits:
-            cpu: 300m
+        - image: noneofyabusiness/fastapi-hpa:local
+          name: fastapi-hpa
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi # 40MB bytearrays + 40MB FastAPI ~ 80 MB -> !OOM
+          imagePullPolicy: IfNotPresent # kind load docker-image
 
 ---
 apiVersion: v1
@@ -35,10 +38,36 @@ metadata:
   name: fastapi-hpa
 spec:
   ports:
-  - name: http
-    port: 80
-    protocol: TCP
-    targetPort: 8080
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
   selector:
     app: fastapi-hpa
   type: ClusterIP
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: fastapi-hpa
+spec:
+  maxReplicas: 7
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 50
+        type: Utilization
+    type: Resource
+  - resource:
+      name: memory
+      target:
+        averageValue: 32Mi
+        type: AverageValue
+    type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: fastapi-hpa
