@@ -344,26 +344,44 @@ hostPath:
 
 ---
 
-It looks like you’ve been deep in the Kubernetes trenches! I've organized your notes into logical categories to make them easier to reference later.
-🌐 Networking & System Inspection
-Netstat vs. NPTL
- * netstat -p: Shows the PID and name of the program to which each socket belongs.
- * netstat -nptl: Provides numerical addresses (faster, no DNS lookup), shows TCP sockets, listening sockets, and the associated program.
-   * Note: Use this to identify specific ports used by services like the Kube-Scheduler.
-Primary Interface Info
-To find the IP address and subnet mask for the controlplane’s primary interface:
+Networking and Ports
+
+Used netstat -p vs netstat -nptl; the -nptl variant helped identify the port used by the scheduler.
+
+
+---
+
+Container Runtime Endpoint
+
+There was an issue identifying the container runtime endpoint. The relevant configuration is located at:
+
+/var/lib/kubelet/config.yaml
+
+
+---
+
+Node Networking
+
+To find the IP address and subnet mask of the control plane node’s primary interface:
+
 ip addr show eth0
 
-Kube-Proxy Mode
-To check what type of proxy (IPtables vs. IPVS) kube-proxy is using:
-kubectl -n kube-system logs <kube-proxy-pod-name> | head
 
-⚙️ Cluster Configuration
-Container Runtime Endpoint
-If you need to identify the runtime endpoint, look in the Kubelet configuration file:
- * Path: /var/lib/kubelet/config.yaml
-CoreDNS Corefile Structure
-The root domain and cluster-specific DNS settings are defined in the Corefile within the kubernetes block:
+---
+
+kube-proxy Mode
+
+To determine which proxy mode kube-proxy is using:
+
+kubectl -n kube-system logs kube-proxy-aser | head
+
+
+---
+
+CoreDNS (Corefile Understanding)
+
+Need a clearer understanding of the Corefile, especially the root domain (.) and how requests are handled.
+
 Corefile: |
   .:53 {
       errors
@@ -371,7 +389,6 @@ Corefile: |
           lameduck 5s
       }
       ready
-      # Defines the cluster domain (cluster.local) and reverse DNS lookups
       kubernetes cluster.local in-addr.arpa ip6.arpa {
           pods insecure
           fallthrough in-addr.arpa ip6.arpa
@@ -387,13 +404,22 @@ Corefile: |
       loadbalance
   }
 
-🛠️ Workload Management & Helm
-Helm Upgrades
-Upgrade a release to a specific version:
+
+---
+
+Helm
+
+Upgrade command used:
+
 helm upgrade dazzling-web bitnami/nginx --version=18.3.6
 
-Removing a Container (Strategic Merge Patch)
-Use $patch: delete to remove a specific item from a list (like a container) via a patch:
+
+---
+
+Strategic Merge Patch (Delete Container)
+
+To remove a container from a Deployment using a patch:
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -405,20 +431,37 @@ spec:
         - $patch: delete
           name: Memcached
 
-📁 Troubleshooting Volumes & ConfigMaps
-The "Key" Rule for Mounted Files
-When a ConfigMap is mounted as a volume, the resulting filename in the container depends on the key defined in the .data section, not the name of the ConfigMap itself.
- * Example: If your ConfigMap looks like this:
-   data:
-  config.conf: <content-of-file>
 
- * Result: Even if the source file used to create the ConfigMap was named kubeconfig.conf, the file mounted inside the pod will be named config.conf.
-🔍 Advanced Kubectl (JSONPath)
-Filtering with Conditionals
-Use JSONPath to filter specific data from your configuration. For example, to find a context name associated with a specific user:
-kubectl config view --kubeconfig=my-kube-config -o jsonpath="{.contexts[?(@.context.user=='aws-user')].name}" > /opt/outputs/aws-context-name
+---
 
-> [!TIP]
-> Bookmark the Kubernetes JSONPath Reference—it's a lifesaver for complex filtering.
-> 
-Would you like me to create a cheat sheet summary of these commands for quick access during a lab or exam?
+ConfigMap Volume Mount Gotcha
+
+When mounting a ConfigMap as a volume, the filename comes from the key, not the value.
+
+In this case:
+
+ConfigMap entry: .data.config.conf: kubeconfig.conf
+
+Mounted file name becomes: config.conf
+
+
+The issue occurred because the configuration referenced the wrong filename.
+
+
+---
+
+JSONPath in kubectl
+
+Discovered conditional expressions in JSONPath; needs more practice.
+
+Example:
+
+kubectl config view \
+  --kubeconfig=my-kube-config \
+  -o jsonpath="{.contexts[?(@.context.user=='aws-user')].name}" \
+  > /opt/outputs/aws-context-name
+
+Reference:
+https://kubernetes.io/docs/reference/kubectl/jsonpath/
+
+
