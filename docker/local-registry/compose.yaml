@@ -1,0 +1,24 @@
+services:
+  registry:
+    image: registry:2
+    restart: always
+    volumes:
+      - ./data:/var/lib/registry
+      - ./auth:/auth
+      - ./config.yaml:/etc/docker/registry/config.yml
+    environment:
+      REGISTRY_HTTP_ADDR: :5000
+
+  caddy:
+    image: caddy:2
+    restart: always
+    ports:
+      - "5000:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

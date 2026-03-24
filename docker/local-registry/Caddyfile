@@ -1,0 +1,3 @@
+registry.localhost {
+    reverse_proxy registry:5000
+}

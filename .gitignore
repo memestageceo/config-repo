@@ -1,4 +1,83 @@
+# ----------------------------
+# 🔐 Secrets (CRITICAL)
+# ----------------------------
 *.env
-node_modules
-build
-.docusaurus
+.env
+.env.*
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+*.kubeconfig
+kubeconfig
+id_rsa
+id_ed25519
+*.tfvars
+*.tfvars.json
+secrets.yaml
+secrets.yml
+
+# ----------------------------
+# ☸️ Kubernetes
+# ----------------------------
+*.kubeconfig
+.kube/
+kubeconfig*
+
+# ----------------------------
+# 🌍 Terraform
+# ----------------------------
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# ----------------------------
+# 🧪 Logs / runtime files
+# ----------------------------
+*.log
+logs/
+*.pid
+*.out
+
+# ----------------------------
+# 🖥️ OS / Editor junk
+# ----------------------------
+.DS_Store
+Thumbs.db
+
+# VSCode
+.vscode/
+
+# ----------------------------
+# 📦 Package managers
+# ----------------------------
+node_modules/
+dist/
+build/
+
+# Python
+__pycache__/
+*.pyc
+
+# Go
+bin/
+
+# ----------------------------
+# 🔧 Misc
+# ----------------------------
+tmp/
+temp/
+.cache/
+
+# ----------------------------
+# 🧬 Certificates (local dev)
+# ----------------------------
+certs/
+*.local.crt
+*.local.key

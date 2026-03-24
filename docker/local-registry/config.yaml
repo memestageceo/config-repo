@@ -1,0 +1,13 @@
+version: 0.1
+
+auth:
+  htpasswd:
+    realm: basic-realm
+    path: /auth/htpasswd
+
+storage:
+  filesystem:
+    rootdirectory: /var/lib/registry
+
+http:
+  addr: :5000
