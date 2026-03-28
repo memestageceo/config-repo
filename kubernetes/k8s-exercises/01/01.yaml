@@ -1,3 +1,6 @@
+---
+#  k run echo-pod --image busybox --restart=OnFailure --dry-run=client -o yaml  --command sh -- -c "while true; do echo 'Hello from CKA'; sleep 5;done" > 01.yaml
+
 apiVersion: v1
 kind: Pod
 metadata:
