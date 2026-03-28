@@ -79,10 +79,12 @@ Create a Pod named `init-writer` with:
 Create a Pod named `log-app` with two containers:
 
 **Container 1** — `writer` using `busybox`:
+
 - Every 3 seconds, appends a line like `log entry: <number>` (incrementing) to `/var/log/app/out.log`.
 - Uses a shell loop with a counter variable.
 
 **Container 2** — `reader` using `busybox`:
+
 - Runs `tail -f /var/log/app/out.log`.
 
 Both containers share an `emptyDir` volume at `/var/log/app`.
@@ -123,12 +125,14 @@ Create the following in the `default` namespace:
 Create a Pod named `pipeline-runner` with two containers:
 
 **Container 1** — `setup` (busybox, runs once then exits):
+
 - Has `MODE` and `TIMEOUT` injected as env vars from the ConfigMap.
 - Has `API_KEY` injected as an env var from the Secret.
 - Also exposes `MY_POD_NAME` via Downward API as an env var.
 - Writes a file `/shared/config-dump.txt` containing all four values (one per line, labeled).
 
 **Container 2** — `runner` (busybox):
+
 - Waits for `/shared/config-dump.txt` to exist (poll in a loop), then prints its contents and sleeps.
 
 Both share an `emptyDir` at `/shared`.
@@ -146,5 +150,3 @@ Create a Deployment named `worker` in namespace `tasks` (create it if needed) wi
 - Set a `restartPolicy` that keeps the containers running.
 
 Then, **without deleting the deployment**, update the `INTERVAL` value in the ConfigMap to `5` and confirm the behavior changes after the pods are restarted.
-
-
