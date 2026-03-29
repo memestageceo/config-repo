@@ -21,8 +21,13 @@ spec:
           fieldPath: spec.nodeName
     image: busybox
     name: downward-env
-    command: ["sleep", "1000"]
+    command: ["sh", "-c"]
+    args:
+      - |-
+        echo "$MY_POD_NAME"
+        echo "$MY_POD_NAMESPACE"
+        echo "$MY_NODE_NAME"
     resources: {}
   dnsPolicy: ClusterFirst
-  restartPolicy: Always
+  restartPolicy: Never
 status: {}
