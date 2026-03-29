@@ -1,7 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
+num=0
 
-if [[ $(kubectl get pod echo-pod --namespace default -o jsonpath='{.spec.restartPolicy}') == 'OnFailure' ]]; then
-	echo "01 passed"
-fi
+while [ "$num" -le 6 ]; do
+	echo "$num"
+	num=$((num + 1))
+done
 

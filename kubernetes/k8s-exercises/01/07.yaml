@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: downward-env
+  name: downward-env
+spec:
+  containers:
+  - env:
+    - name: MY_POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
+    - name: MY_POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+    - name: MY_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+    image: busybox
+    name: downward-env
+    command: ["sh", "-c"]
+    args:
+      - |-
+        echo "$MY_POD_NAME"
+        echo "$MY_POD_NAMESPACE"
+        echo "$MY_NODE_NAME"
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}

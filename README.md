@@ -1,5 +1,9 @@
 # Kubernetes Learning Highlights
 
+important:
+
+- [sidecar with shell script](./kubernetes/k8s-exercises/01/06.yaml): the shell scripts I made were totally wrong, leading to repeated errors. And I was wrong about the sidecar container sequence.
+
 ## 1. Network Policies
 
 Control traffic flow at the IP address or port level (OSI Layer 3/4). Requires a network plugin that supports enforcement.
@@ -341,13 +345,11 @@ hostPath:
   type: DirectoryOrCreate
 ```
 
-
 ---
 
 Networking and Ports
 
 Used netstat -p vs netstat -nptl; the -nptl variant helped identify the port used by the scheduler.
-
 
 ---
 
@@ -357,7 +359,6 @@ There was an issue identifying the container runtime endpoint. The relevant conf
 
 /var/lib/kubelet/config.yaml
 
-
 ---
 
 Node Networking
@@ -366,7 +367,6 @@ To find the IP address and subnet mask of the control plane node’s primary int
 
 ip addr show eth0
 
-
 ---
 
 kube-proxy Mode
@@ -374,7 +374,6 @@ kube-proxy Mode
 To determine which proxy mode kube-proxy is using:
 
 kubectl -n kube-system logs kube-proxy-aser | head
-
 
 ---
 
@@ -404,7 +403,6 @@ Corefile: |
       loadbalance
   }
 
-
 ---
 
 Helm
@@ -412,7 +410,6 @@ Helm
 Upgrade command used:
 
 helm upgrade dazzling-web bitnami/nginx --version=18.3.6
-
 
 ---
 
@@ -431,7 +428,6 @@ spec:
         - $patch: delete
           name: Memcached
 
-
 ---
 
 ConfigMap Volume Mount Gotcha
@@ -444,9 +440,7 @@ ConfigMap entry: .data.config.conf: kubeconfig.conf
 
 Mounted file name becomes: config.conf
 
-
 The issue occurred because the configuration referenced the wrong filename.
-
 
 ---
 
@@ -462,6 +456,4 @@ kubectl config view \
   > /opt/outputs/aws-context-name
 
 Reference:
-https://kubernetes.io/docs/reference/kubectl/jsonpath/
-
-
+<https://kubernetes.io/docs/reference/kubectl/jsonpath/>

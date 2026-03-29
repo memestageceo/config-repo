@@ -103,6 +103,8 @@ Create a Pod named `downward-env` using the `busybox` image that exposes the fol
 
 The container should print all three values on startup and exit.
 
+[![asciicast](https://asciinema.org/a/3XBPdleJXuMjn2Ov.svg)](https://asciinema.org/a/3XBPdleJXuMjn2Ov)
+
 ---
 
 ## Exercise 8 — Downward API as a Volume

@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: config-reader
+  name: config-reader
+spec:
+  containers:
+  - image: busybox
+    name: config-reader
+    envFrom:
+      - configMapRef:
+          name: app-config 
+    volumeMounts:
+      - name: app-config
+        mountPath: /etc/config
+        readOnly: true
+    resources: {}
+    command: ["sh", "-c"]
+    args:
+      - for filename in /etc/config/*; do cat $filename; done 
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  volumes:
+    - name: app-config
+      configMap:
+        name: app-config
+status: {}

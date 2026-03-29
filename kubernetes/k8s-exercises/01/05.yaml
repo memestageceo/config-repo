@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: init-writer
+  name: init-writer
+spec:
+  initContainers:
+  - command:
+    - sh
+    args:
+    - -c
+    - echo "initialized at $(date)" > /work-dir/status.txt
+    image: busybox
+    name: init-container
+    volumeMounts:
+      - name: work-dir
+        mountPath: /work-dir
+        readOnly: false
+    resources: {}
+  containers:
+    - name: busybox
+      image: busybox
+      command: ["sh", "-c"]
+      args:
+        - cat /work-dir/status.txt
+        - sleep 5000
+      volumeMounts:
+        - name: work-dir
+          mountPath: /work-dir
+          readOnly: true
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  volumes:
+    - name: work-dir
+      emptyDir: {}
+status: {}
