@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: pipeline-runner
+  name: pipeline-runner
+spec:
+  initContainers:
+  - command:
+    - sh
+    - -c
+    args:
+      - |-
+        touch /shared/config-dump.txt
+        echo "$MODE" >> /shared/config-dump.txt
+        echo "$TIMEOUT" >> /shared/config-dump.txt
+        echo "$API_KEY" >> /shared/config-dump.txt
+        echo "$MY_POD_NAME" >> /shared/config-dump.txt
+    env:
+      - name: MY_POD_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.name
+    envFrom:
+      - configMapRef:
+          name: pipeline-config
+      - secretRef:
+          name: pipeline-secret
+    image: busybox
+    name: setup
+    resources: {}
+    volumeMounts:
+      - name: config-dump
+        mountPath: /shared
+        readOnly: false
+  containers:
+  - name: runner
+    image: busybox
+    command: ["sh", "-c"]
+    args:
+      - |-
+        cat /shared/config-dump.txt
+        sleep "5000"
+    volumeMounts:
+      - name: config-dump
+        mountPath: /shared
+        readOnly: true
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  volumes:
+    - name: config-dump
+      emptyDir: {}
+status: {}
