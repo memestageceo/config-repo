@@ -1,0 +1,112 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: weblog
+spec: {}
+status: {}
+---
+apiVersion: v1
+data:
+  LOG_FILE: app.log
+  LOG_PATH: /var/log/app
+  MAX_ENTRIES: "100"
+kind: ConfigMap
+metadata:
+  name: log-config
+  namespace: weblog
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: web-logger
+  name: web-logger
+  namespace: weblog
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-logger
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: web-logger
+    spec:
+      volumes:
+        - name: app-log
+          emptyDir: {}
+      initContainers:
+        - name: dir-setup
+          image: busybox
+          envFrom:
+            - configMapRef:
+                name: log-config
+          volumeMounts:
+            - name: app-log
+              mountPath: /var/log/app
+              readOnly: false
+          command: ["sh", "-c"]
+          args:
+            - echo "directory created by init at $(date +%s)" > "$LOG_PATH/init.txt"
+              exit 0
+        - name: log-shipper
+          restartPolicy: Always
+          image: busybox
+          envFrom:
+            - configMapRef:
+                name: log-config
+          volumeMounts:
+            - name: app-log
+              mountPath: /var/log/app
+              readOnly: true
+          command: ["sh", "-c"]
+          args:
+            - |-
+              FILE_PATH="$LOG_PATH/$LOG_FILE"
+              while [[ ! -f /var/log/app/app.log ]]; do
+                echo "waiting for file"
+                sleep 1
+              done;
+              tail -f "$FILE_PATH"
+      containers:
+        - image: busybox
+          name: app
+          volumeMounts:
+            - name: app-log
+              mountPath: /var/log/app
+              readOnly: false
+          command: ["sh", "-c"]
+          args:
+            - |-
+              FILE_PATH="$LOG_PATH/$LOG_FILE"
+              counter=0
+              echofn() {
+                      echo "{\"pod\":\"$MY_POD_NAME\",\"ip\":\"$MY_POD_IP\",\"entry\":$counter,\"ts\":\"$(date)\"}"
+              }
+              while true; do
+                      if [[ $counter -eq $MAX_ENTRIES  ]]; then
+                              counter=0
+                              echofn | tee "$FILE_PATH"
+                      else
+                              echofn | tee -a "$FILE_PATH"
+                      fi
+
+                      counter=$((counter+1))
+                      sleep 2
+              done
+          envFrom:
+            - configMapRef:
+                name: log-config
+          env:
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          resources: {}
+status: {}
