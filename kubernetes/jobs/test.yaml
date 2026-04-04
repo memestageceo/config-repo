@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: headless-svc
+spec:
+  clusterIP: None # clusterIP must be None to create a headless service
+  selector:
+    job-name: example-job # must match Job name
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: example-job
+spec:
+  completions: 3
+  parallelism: 3
+  completionMode: Indexed
+  template:
+    spec:
+      subdomain: headless-svc # has to match Service name
+      restartPolicy: Never
+      containers:
+      - name: example-workload
+        image: bash:latest
+        command:
+        - bash
+        - -c
+        - |
+          for i in 0 1 2
+          do
+            gotStatus="-1"
+            wantStatus="0"             
+            while [ $gotStatus -ne $wantStatus ]
+            do                                       
+              ping -c 1 example-job-${i}.headless-svc > /dev/null 2>&1
+              gotStatus=$?                
+              if [ $gotStatus -ne $wantStatus ]; then
+                echo "Failed to ping pod example-job-${i}.headless-svc, retrying in 1 second..."
+                sleep 1
+              fi
+            done                                                         
+            echo "Successfully pinged pod: example-job-${i}.headless-svc"
+          done          
+

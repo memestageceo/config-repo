@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi-calculator
+spec:
+  backoffLimit: 3
+  completions: 1
+  template:
+    metadata: {}
+    spec:
+      restartPolicy: Never
+      containers:
+      - command: ["sh", "-c"]
+        args:
+          - |-
+            perl -Mbignum=bpi -wle "print bpi(2000)"
+        image: perl:5.34
+        name: pi-calculator
+        resources: {}
+status: {}
