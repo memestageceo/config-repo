@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: shard-processor
+spec:
+  completionMode: Indexed
+  parallelism: 5
+  completions: 5
+  template:
+    metadata: {}
+    spec:
+      volumes:
+        - name: input-data
+          emptyDir: {}
+      initContainers:
+        - name: writer
+          image: busybox
+          command: ["sh", "-c"]
+          args:
+            - echo "Processing shard $JOB_COMPLETION_INDEX" > /tmp/input.txt
+          volumeMounts:
+            - name: input-data
+              mountPath: /tmp
+              readOnly: false
+      containers:
+      - command:
+        - sh
+        - -c
+        args:
+          - cat /tmp/input.txt
+        image: busybox
+        name: shard-processor
+        resources: {}
+        volumeMounts:
+          - name: input-data
+            mountPath: /tmp
+            readOnly: true
+      restartPolicy: Never
+status: {}
