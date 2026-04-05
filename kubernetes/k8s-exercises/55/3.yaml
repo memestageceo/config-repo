@@ -1,0 +1,47 @@
+# quota=3 && parallelism=4...
+# job completed, so the controller...
+# doesn't have to run 4 pods in parallel
+# effective parallelism=quota.pod=3
+# classic throttling: limits how much the job can run
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: migrations
+spec: {}
+status: {}
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: pod-limit
+  namespace: migrations
+spec:
+  hard:
+    pods: "3"
+status: {}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-migrator
+  namespace: migrations
+spec:
+  parallelism: 4
+  completions: 8
+  template:
+    metadata: {}
+    spec:
+      containers:
+      - command:
+        - sh
+        - -c
+        args:
+          - |-
+            echo "migrating..." && sleep 10
+        image: busybox
+        name: db-migrator
+        resources: {}
+      restartPolicy: Never
+status: {}
