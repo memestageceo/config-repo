@@ -23,17 +23,17 @@ spec:
               mountPath: /tmp
               readOnly: false
       containers:
-      - command:
-        - sh
-        - -c
-        args:
-          - cat /tmp/input.txt
-        image: busybox
-        name: shard-processor
-        resources: {}
-        volumeMounts:
-          - name: input-data
-            mountPath: /tmp
-            readOnly: true
+        - command:
+            - sh
+            - -c
+          args:
+            - cat /tmp/input.txt
+          image: busybox
+          name: shard-processor
+          resources: {}
+          volumeMounts:
+            - name: input-data
+              mountPath: /tmp
+              readOnly: true
       restartPolicy: Never
 status: {}
