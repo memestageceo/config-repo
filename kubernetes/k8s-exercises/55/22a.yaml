@@ -1,0 +1,38 @@
+---
+# 0: job-1 runs
+# 1: job-1 sleeping & job-2 triggered
+# 2: job-1 ends, but wadabout job-2
+# job wan't missed when concurrencyPolicy unset
+# so will set in this one and check wadup with this 💩
+# as expected, got message Not starting...blah blah blah!
+# so lets set startDealineSeconds
+# forgot the ing in startingDealineSeconds...winning!
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: report-generator
+spec:
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 30
+  # so these are no of jobs created
+  # so only last 3 complete jobs are kept
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    metadata:
+      name: report-generator
+    spec:
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - command:
+            - sh
+            - -c
+            - sleep 120
+            image: busybox
+            name: report-generator
+            resources: {}
+          restartPolicy: OnFailure
+  schedule: "*/1 * * * *"
+status: {}

@@ -1,0 +1,27 @@
+---
+# 0: job-1 runs
+# 1: job-1 sleeping & job-2 triggered
+# 2: job-1 ends, but wadabout job-2
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: report-generator
+spec:
+  jobTemplate:
+    metadata:
+      name: report-generator
+    spec:
+      template:
+        metadata: {}
+        spec:
+          containers:
+          - command:
+            - sh
+            - -c
+            - sleep 120
+            image: busybox
+            name: report-generator
+            resources: {}
+          restartPolicy: OnFailure
+  schedule: "*/1 * * * *"
+status: {}
