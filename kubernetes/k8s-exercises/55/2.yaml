@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: bulk-import
+spec:
+  parallelism: 2
+  completions: 6
+  ttlSecondsAfterFinished: 60
+  template:
+    metadata: {}
+    spec:
+      containers:
+      - command:
+        - sh
+        - -c
+        args:
+          - |-
+            sleep 5 && echo "item processed"
+        image: busybox
+        name: bulk-import
+        resources: {}
+      restartPolicy: Never
+status: {}
