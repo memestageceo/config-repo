@@ -1,0 +1,5 @@
+---
+resources:
+  - cm-mysql.yaml
+  - svc-mysql.yaml
+  - sts-mysql.yaml

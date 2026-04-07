@@ -1,0 +1,74 @@
+---
+apiVersion: v1
+data:
+  MODE: batch
+  TIMEOUT: "30"
+kind: ConfigMap
+metadata:
+  name: pipeline-config
+---
+apiVersion: v1
+data:
+  password: czNjcjN0
+  username: YWRtaW4=
+kind: Secret
+metadata:
+  name: db-creds
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: pipeline-runner
+  name: pipeline-runner
+spec:
+  initContainers:
+  - command:
+    - sh
+    - -c
+    args:
+      - |-
+        echo "MODE=$MODE" > /shared/config-dump.txt
+        echo "TIMEOUT=$TIMEOUT" >> /shared/config-dump.txt
+        echo "API_KEY=$API_KEY" >> /shared/config-dump.txt
+        echo "MY_POD_NAME=$MY_POD_NAME" >> /shared/config-dump.txt
+    env:
+      - name: MY_POD_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.name
+    envFrom:
+      - configMapRef:
+          name: pipeline-config
+      - secretRef:
+          name: pipeline-secret
+    image: busybox
+    name: setup
+    resources: {}
+    volumeMounts:
+      - name: config-dump
+        mountPath: /shared
+        readOnly: false
+  containers:
+  - name: runner
+    image: busybox
+    command: ["sh", "-c"]
+    args:
+      - |-
+        while [ ! -f /shared/config-dump.txt ]; do
+          echo "Waiting for config-dump.txt..."
+          sleep 1
+        done
+        cat /shared/config-dump.txt
+        sleep 5000
+    volumeMounts:
+      - name: config-dump
+        mountPath: /shared
+        readOnly: true
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  volumes:
+    - name: config-dump
+      emptyDir: {}
+status: {}

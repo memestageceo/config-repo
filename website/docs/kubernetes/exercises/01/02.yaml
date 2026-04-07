@@ -1,0 +1,26 @@
+---
+#  k run greeter --image busybox --env=GREETING="Kubernetes is fun" --restart=Never --dry-run=client -o yaml --command sh -- -c "echo $GREETING"
+
+# basic idea is to access the env variable declared in the manifest.
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: greeter
+  name: greeter
+spec:
+  containers:
+  - command:
+    - sh
+    - -c
+    args:
+      - echo $GREETING
+    env:
+    - name: GREETING
+      value: Kubernetes is fun
+    image: busybox
+    name: greeter
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+status: {}

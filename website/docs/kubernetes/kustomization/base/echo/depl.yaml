@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: echo
+  name: echo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echo
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: echo
+    spec:
+      containers:
+        - image: hashicorp/http-echo
+          name: http-echo
+          ports:
+            - containerPort: 5678
+          resources: {}
+          args: ["-text=world"]
+          envFrom:
+            - configMapRef:
+                name: echo-config
+status: {}

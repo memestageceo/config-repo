@@ -1,39 +1,36 @@
 ---
 title: Introduction
-description: DevOps and Kubernetes reference documentation covering cluster setup, networking, security, storage, debugging, and Linux system guides.
-tags: [kubernetes, devops, introduction]
+description: A collection of DevOps tools, hands-on walkthroughs, and reference guides for Kubernetes, Linux, and infrastructure.
 sidebar_position: 1
+tags: [kubernetes, devops, overview]
 ---
 
-# DevOps & K8s Docs
+# Introduction
 
-A practical reference for Kubernetes, Linux, and DevOps tooling.
+A Collection of tools, hands-on walkthroughs with source code.
+The Ultimate Swiss Army knife for DevOps, Developers and Platform Engineers
 
 ## What's in here
 
 | Section | Topics |
 |---------|--------|
-| **Kubernetes** | Cluster setup, ConfigMaps, Networking, Security (RBAC, NetworkPolicy), Services, Storage, Workloads (HPA, DaemonSets), StatefulSets, Kustomize, Exercises |
-| **Debugging** | Kubernetes debugging workflows, application troubleshooting |
-| **Linux & System** | Arch Linux, KVM/QEMU, NVIDIA + Docker, SSH/GPG, display config |
+| **Kubernetes** | Cluster setup, ConfigMaps, Networking/Ingress, Security (RBAC, NetworkPolicy), Services, Storage, Workloads (HPA, DaemonSets), StatefulSets, Kustomize, Exercises |
+| **Debugging** | Kubernetes debugging workflows, WordPress/MySQL troubleshooting |
+| **Services & Storage** | Service port diagrams, PV/PVC/StorageClass, Kind hostPath |
+| **Linux** | Arch Linux guides — KVM/QEMU, NVIDIA + Docker, SSH/GPG, monitor brightness |
 | **WordPress** | Deploying and troubleshooting WordPress on Kind |
 
-## How the sidebar works
+## How to add docs
 
-Docs are organized using numbered folders and files. The numbers control sort order and are stripped from display:
+Drop a `.md` file into the right folder with frontmatter:
 
-- `01-kubernetes/` → **Kubernetes**
-- `01-getting-started.md` → **Getting Started**
-
-To add a new doc, drop a `.md` file into the appropriate folder with:
-
-1. A numeric prefix for ordering (`01-`, `02-`, etc.)
-2. A frontmatter block at the top
-
-```md
+```yaml
 ---
-title: My New Doc
-description: What this page covers
+title: My Page Title
+description: One-line summary
 tags: [kubernetes, networking]
+sidebar_position: 1
 ---
 ```
+
+The folder structure becomes the sidebar automatically — no config files needed.
