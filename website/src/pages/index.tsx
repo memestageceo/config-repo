@@ -53,25 +53,25 @@ const features = [
     title: 'Kubernetes',
     description:
       'Cluster setup, networking, security (RBAC, NetworkPolicy), storage, workloads, and hands-on exercises.',
-    link: '/docs/category/kubernetes',
+    link: '/docs/kubernetes',
   },
   {
     title: 'Debugging',
     description:
       'Practical troubleshooting guides for Kubernetes and application-level debugging workflows.',
-    link: '/docs/category/debugging',
+    link: '/docs/debugging',
   },
   {
     title: 'Linux & System',
     description:
       'Arch Linux guides covering GPU setup, KVM/QEMU virtualization, SSH/GPG, and display configuration.',
-    link: '/docs/category/linux',
+    link: '/docs/linux',
   },
   {
     title: 'WordPress',
     description:
       'Deploying and troubleshooting WordPress on Kubernetes with Kind.',
-    link: '/docs/category/wordpress',
+    link: '/docs/wordpress',
   },
 ];
 
