@@ -1,0 +1,44 @@
+/**
+ * Custom CSS for DevOps & K8s Docs
+ * Uses Docusaurus CSS variables for theming
+ */
+
+/* Primary color: Kubernetes blue */
+:root {
+  --ifm-color-primary: #326ce5;
+  --ifm-color-primary-dark: #1f5ed4;
+  --ifm-color-primary-darker: #1d59c8;
+  --ifm-color-primary-darkest: #1849a4;
+  --ifm-color-primary-light: #4579e8;
+  --ifm-color-primary-lighter: #5184ea;
+  --ifm-color-primary-lightest: #7a9eef;
+  --ifm-code-font-size: 90%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #6b9fff;
+  --ifm-color-primary-dark: #4d8bff;
+  --ifm-color-primary-darker: #3e82ff;
+  --ifm-color-primary-darkest: #1168ff;
+  --ifm-color-primary-light: #89b3ff;
+  --ifm-color-primary-lighter: #98bbff;
+  --ifm-color-primary-lightest: #c5d9ff;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Improve code block readability */
+.theme-code-block {
+  font-size: 0.875rem;
+}
+
+/* Make inline code stand out slightly */
+code {
+  border-radius: 4px;
+  padding: 0.1em 0.3em;
+}
+
+/* Tighten up the sidebar */
+.menu__link {
+  font-size: 0.9rem;
+}
