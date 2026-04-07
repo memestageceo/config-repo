@@ -1,5 +1,7 @@
 # Kubernetes Learning Highlights
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/2eaa1a2e-9c8f-4aa0-9507-9745171a88c4/deploy-status)](https://app.netlify.com/projects/docsops/deploys)
+
 important:
 
 - [sidecar with shell script](./kubernetes/k8s-exercises/01/06.yaml): the shell scripts I made were totally wrong, leading to repeated errors. And I was wrong about the sidecar container sequence.
