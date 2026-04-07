@@ -14,7 +14,6 @@ const config: Config = {
   projectName: 'config-repo',
 
   onBrokenLinks: 'warn',
-  onBrokenMarkdownLinks: 'warn',
 
   i18n: {
     defaultLocale: 'en',
@@ -23,6 +22,9 @@ const config: Config = {
 
   markdown: {
     mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
   },
 
   themes: [
@@ -94,8 +96,8 @@ const config: Config = {
           title: 'Docs',
           items: [
             { label: 'Introduction', to: '/docs/intro' },
-            { label: 'Kubernetes', to: '/docs/category/kubernetes' },
-            { label: 'Debugging', to: '/docs/category/debugging' },
+            { label: 'Kubernetes', to: '/docs/kubernetes' },
+            { label: 'Debugging', to: '/docs/debugging' },
           ],
         },
         {

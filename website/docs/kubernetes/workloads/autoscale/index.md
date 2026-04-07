@@ -133,5 +133,5 @@ Each endpoint increments the counter. Prometheus then computes `rate(app_request
 
 ### Links
 
-- KEDA: <https://keda.sh/docs/latest/scalers/prometheus/>
-- prometheus-adapter (native HPA path): <https://github.com/kubernetes-sigs/prometheus-adapter>
+- [KEDA Prometheus Scaler](https://keda.sh/docs/latest/scalers/prometheus/)
+- [prometheus-adapter (native HPA path)](https://github.com/kubernetes-sigs/prometheus-adapter)
