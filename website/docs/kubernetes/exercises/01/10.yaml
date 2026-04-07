@@ -1,0 +1,53 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: tasks
+
+---
+apiVersion: v1
+data:
+  INTERVAL: "5"
+kind: ConfigMap
+metadata:
+  name: worker-config
+  namespace: tasks
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: worker
+  name: worker
+  namespace: tasks
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: worker
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+      - image: busybox
+        name: busybox
+        resources: {}
+        restartPolicy: Always
+        command: ["sh", "-c"]
+        args: 
+        - |-
+          while true; do
+            echo "worker sleeping for $INTERVAL seconds"
+            sleep "$INTERVAL"
+          done
+        env:
+          - name: INTERVAL
+            valueFrom:
+              configMapKeyRef:
+                name: worker-config
+                key: INTERVAL
+status: {}

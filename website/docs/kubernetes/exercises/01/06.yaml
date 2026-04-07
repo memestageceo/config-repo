@@ -1,0 +1,38 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: log-app
+  name: log-app
+spec:
+  volumes:
+    - name: app-log
+      emptyDir: {}
+  containers:
+    - name: writer
+      image: busybox
+      volumeMounts:
+        - name: app-log
+          mountPath: /var/log/app
+          readOnly: false
+      command: ["sh", "-c"]
+      args:
+        - |-
+          i=0
+          while true; do
+            echo "log entry: $i" >> /var/log/app/out.log;
+            i=$((i + 1));
+            sleep 3;
+          done
+  initContainers:
+    - name: reader
+      image: busybox
+      restartPolicy: Always
+      volumeMounts:
+        - name: app-log
+          mountPath: /var/log/app
+          readOnly: true
+      command: ["sh", "-c"]
+      args:
+        - tail -F /var/log/app/out.log;

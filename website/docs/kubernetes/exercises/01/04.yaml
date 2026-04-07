@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: secret-reader
+  name: secret-reader
+spec:
+  containers:
+  - image: busybox
+    name: secret-reader
+    resources: {}
+    command: ["sh", "-c"]
+    args:
+      - for filename in /etc/secrets/*; do cat $filename; done
+    volumeMounts:
+      - name: db-creds
+        mountPath: /etc/secrets
+        readOnly: true
+    envFrom:
+      - secretRef:
+          name: db-creds
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  volumes:
+    - name: db-creds
+      secret:
+        secretName: db-creds 
+status: {}
