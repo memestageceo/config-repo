@@ -47,7 +47,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl:
-            'https://github.com/memestageceo/config-repo/edit/main/website/',
+            'https://github.com/memestageceo/config-repo/edit/main/',
           showLastUpdateTime: true,
           showLastUpdateAuthor: true,
           numberPrefixParser: true,

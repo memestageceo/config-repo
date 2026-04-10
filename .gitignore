@@ -61,6 +61,9 @@ node_modules/
 dist/
 build/
 
+# Docusaurus
+.docusaurus/
+
 # Python
 __pycache__/
 *.pyc
