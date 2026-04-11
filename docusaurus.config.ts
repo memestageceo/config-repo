@@ -1,19 +1,43 @@
 import { themes as prismThemes } from 'prism-react-renderer';
-import type { Config } from '@docusaurus/types';
+import type { Config, Plugin } from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
+const disableBrokenWebpackBar = (): Plugin => ({
+  name: 'disable-broken-webpackbar',
+  configureWebpack(config) {
+    const plugins = (config.plugins ?? []).filter(
+      (plugin) => plugin?.constructor?.name !== 'WebpackBarPlugin',
+    );
+
+    return {
+      plugins,
+      mergeStrategy: {
+        plugins: 'replace',
+      },
+    };
+  },
+});
+
 const config: Config = {
-  title: 'DevOps & K8s Docs',
-  tagline: 'Kubernetes, Linux, and DevOps reference guides',
+  title: 'DevOps, K8s & Cloud',
+  tagline: 'Configs that work, served with explanations',
   favicon: 'img/favicon.ico',
 
   url: process.env.SITE_URL ?? 'https://your-domain.com',
   baseUrl: '/',
+  storage: {
+    type: 'localStorage',
+    namespace: true,
+  },
 
   organizationName: 'memestageceo',
   projectName: 'config-repo',
 
   onBrokenLinks: 'warn',
+  future: {
+    v4: true,
+    faster: true,
+  },
 
   i18n: {
     defaultLocale: 'en',
@@ -39,6 +63,7 @@ const config: Config = {
       },
     ],
   ],
+  plugins: [disableBrokenWebpackBar],
 
   presets: [
     [
@@ -52,7 +77,17 @@ const config: Config = {
           showLastUpdateAuthor: true,
           numberPrefixParser: true,
         },
-        blog: false,
+        blog: {
+          showReadingTime: true,
+          blogTitle: 'dev latest',
+          blogDescription:
+            'Configs that work, served with Explanations',
+          postsPerPage: 10,
+          blogSidebarTitle: 'Recent posts',
+          blogSidebarCount: 'ALL',
+          editUrl:
+            'https://github.com/memestageceo/config-repo/edit/main/',
+        },
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -70,7 +105,7 @@ const config: Config = {
       theme: { light: 'neutral', dark: 'dark' },
     },
     navbar: {
-      title: 'DevOps & K8s Docs',
+      title: 'Aditya Raj',
       logo: {
         alt: 'DevOps Docs Logo',
         src: 'img/logo.svg',
@@ -81,6 +116,11 @@ const config: Config = {
           sidebarId: 'tutorialSidebar',
           position: 'left',
           label: 'Docs',
+        },
+        {
+          to: '/blog',
+          label: 'Blog',
+          position: 'left',
         },
         {
           href: 'https://github.com/memestageceo/config-repo',
@@ -101,8 +141,23 @@ const config: Config = {
           ],
         },
         {
-          title: 'More',
+          title: 'Blog',
           items: [
+            { label: 'Latest posts', to: '/blog' },
+            { label: 'Authors', to: '/blog/authors' },
+          ],
+        },
+        {
+          title: 'Author',
+          items: [
+            {
+              label: 'LinkedIn',
+              href: 'https://www.linkedin.com/in/aditya-raj-content-creator/',
+            },
+            {
+              label: 'YouTube',
+              href: 'https://www.youtube.com/@memestagestartup',
+            },
             {
               label: 'GitHub',
               href: 'https://github.com/memestageceo/config-repo',
@@ -110,7 +165,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Aditya Raj. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

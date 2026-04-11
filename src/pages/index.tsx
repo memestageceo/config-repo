@@ -21,7 +21,19 @@ function HomepageHero() {
             to="/docs/intro">
             Get Started →
           </Link>
+          <Link className="button button--outline button--lg" to="/blog">
+            Read the Blog
+          </Link>
         </div>
+        <p className={styles.authorNote}>
+          By <strong>Aditya Raj</strong> - technical writer & developer
+          advocate into DevOps, K8s, cloud, and AI. Follow on{' '}
+          <Link to="https://www.linkedin.com/in/aditya-raj-content-creator/">
+            LinkedIn
+          </Link>{' '}
+          and{' '}
+          <Link to="https://www.youtube.com/@memestagestartup">YouTube</Link>.
+        </p>
       </div>
     </header>
   );
@@ -79,7 +91,8 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="Home"
-      description="Kubernetes, Linux, and DevOps reference guides">
+      description="Docs are serious, blogs, not so much."
+      >
       <HomepageHero />
       <main>
         <section className={styles.features}>
