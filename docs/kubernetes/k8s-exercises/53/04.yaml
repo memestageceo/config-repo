@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: archive
+spec: {}
+status: {}
+
+---
+apiVersion: v1
+data:
+  ARCHIVE_DIR: /logs/archives
+  LINES_PER_SUMMARY: "20"
+  LOG_FILE: /logs/app.log
+kind: ConfigMap
+metadata:
+  name: archive-config
+  namespace: archive
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: log-producer
+  name: log-producer
+  namespace: archive
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-producer
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: log-producer
+    spec:
+      volumes:
+        - name: logs
+          hostPath:
+            path: /files/app
+            type: DirectoryOrCreate
+      containers:
+      - command:
+          - sh
+          - -c
+        args:
+          - |-
+            touch "$LOG_FILE"
+            counter=0
+            while true; do
+              echo "$(date) - event $counter" >> "$LOG_FILE"
+              counter=$((counter+1))
+              sleep 1
+            done
+        image: busybox
+        name: busybox
+        resources: {}
+        volumeMounts:
+          - name: logs
+            mountPath: /logs
+            readOnly: false
+        envFrom:
+          - configMapRef:
+              name: archive-config
+status: {}
