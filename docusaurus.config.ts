@@ -23,7 +23,7 @@ const config: Config = {
   tagline: 'Configs that work, served with explanations',
   favicon: 'img/favicon.ico',
 
-  url: process.env.SITE_URL ?? 'https://your-domain.com',
+  url: process.env.SITE_URL ?? 'https://docsops.netlify.app',
   baseUrl: '/',
   storage: {
     type: 'localStorage',
@@ -69,6 +69,10 @@ const config: Config = {
     [
       'classic',
       {
+	gtag: {
+	  trackingID: 'G-8K2HKY2CZZ',
+	  anonymizeIP: true,
+	},
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl:
