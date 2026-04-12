@@ -1,9 +1,13 @@
-/**
- * Custom CSS for DevOps & K8s Docs
- * Uses Docusaurus CSS variables for theming
- */
+/* ================================================
+   DevOps & K8s Docs — custom theme
+   ================================================ */
 
-/* Primary color: Kubernetes blue */
+/* JetBrains Mono — self-hosted via @fontsource */
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/400-italic.css';
+@import '@fontsource/jetbrains-mono/600.css';
+
+/* ---------- Light mode ---------- */
 :root {
   --ifm-color-primary: #326ce5;
   --ifm-color-primary-dark: #1f5ed4;
@@ -12,10 +16,19 @@
   --ifm-color-primary-light: #4579e8;
   --ifm-color-primary-lighter: #5184ea;
   --ifm-color-primary-lightest: #7a9eef;
-  --ifm-code-font-size: 90%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  --ifm-code-font-size: 94%;
+  --ifm-global-radius: 0.5rem;
+  --ifm-heading-font-weight: 700;
+
+  /* Use JetBrains Mono for all code */
+  --ifm-font-family-monospace: 'JetBrains Mono', 'Cascadia Code', 'Fira Code',
+    ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --docusaurus-highlighted-code-line-bg: rgba(50, 108, 229, 0.08);
 }
 
+/* ---------- Dark mode ---------- */
 [data-theme='dark'] {
   --ifm-color-primary: #6b9fff;
   --ifm-color-primary-dark: #4d8bff;
@@ -24,21 +37,201 @@
   --ifm-color-primary-light: #89b3ff;
   --ifm-color-primary-lighter: #98bbff;
   --ifm-color-primary-lightest: #c5d9ff;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  --docusaurus-highlighted-code-line-bg: rgba(107, 159, 255, 0.12);
+  --ifm-background-color: #0f1117;
+  --ifm-background-surface-color: #161b27;
+  --ifm-navbar-background-color: rgba(15, 17, 23, 0.88);
 }
 
-/* Improve code block readability */
-.theme-code-block {
+/* ---------- Navbar ---------- */
+.navbar {
+  box-shadow: 0 1px 0 0 var(--ifm-color-emphasis-200);
+}
+
+[data-theme='dark'] .navbar {
+  backdrop-filter: saturate(1.8) blur(20px);
+  -webkit-backdrop-filter: saturate(1.8) blur(20px);
+}
+
+.navbar__brand {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.navbar__link {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* ---------- Sidebar — minimal, rely on Docusaurus defaults ---------- */
+.menu__link {
   font-size: 0.875rem;
 }
 
-/* Make inline code stand out slightly */
-code {
-  border-radius: 4px;
-  padding: 0.1em 0.3em;
+/* ---------- Doc content typography ---------- */
+.markdown h1:first-child {
+  font-size: 2rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--ifm-color-emphasis-200);
+  margin-bottom: 1.5rem;
 }
 
-/* Tighten up the sidebar */
-.menu__link {
+.markdown h2 {
+  margin-top: 2.5rem;
+  font-size: 1.4rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.markdown h3 {
+  margin-top: 1.75rem;
+  font-size: 1.1rem;
+}
+
+/* ---------- Tables ---------- */
+table {
+  display: table;
+  width: 100%;
   font-size: 0.9rem;
+  border-radius: var(--ifm-global-radius);
+  overflow: hidden;
+}
+
+table th {
+  background: var(--ifm-color-emphasis-100);
+  font-weight: 600;
+}
+
+/* ---------- Inline code ---------- */
+code {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.88em;
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  background: #282a36;
+  color: #f8f8f2;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-feature-settings: 'liga' 1, 'calt' 1;
+}
+
+[data-theme='light'] code {
+  background: #282a36;
+  color: #f8f8f2;
+}
+
+pre code {
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* ---------- Code blocks ---------- */
+.theme-code-block {
+  border-radius: 8px !important;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(80, 80, 120, 0.25),
+    0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Force monospace + readable size on the actual <pre> */
+.theme-code-block pre,
+.theme-code-block code {
+  font-family: var(--ifm-font-family-monospace) !important;
+  font-size: 0.95rem !important;
+  line-height: 1.65 !important;
+  font-feature-settings: 'liga' 1, 'calt' 1;
+}
+
+/* Title bar */
+.theme-code-block [class*='codeBlockTitle'] {
+  background: #1e1f29;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #bd93f9;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 0.5rem 1.25rem;
+}
+
+/* The <pre> container */
+.theme-code-block pre {
+  background: #282a36 !important;
+  padding: 1.25rem 1.5rem !important;
+}
+
+/* Highlighted lines */
+.theme-code-block .docusaurus-highlight-code-line {
+  background: rgba(189, 147, 249, 0.12);
+  border-left: 3px solid #bd93f9;
+  margin: 0 -1.5rem;
+  padding: 0 1.5rem 0 calc(1.5rem - 3px);
+  display: block;
+}
+
+/* Copy button */
+.theme-code-block button[class*='copyButton'] {
+  color: #6272a4;
+  transition: color 0.15s, opacity 0.15s;
+}
+
+.theme-code-block button[class*='copyButton']:hover {
+  color: #f8f8f2;
+}
+
+/* Fade copy button in on hover */
+.theme-code-block [class*='buttonGroup'] {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.theme-code-block:hover [class*='buttonGroup'] {
+  opacity: 1;
+}
+
+/* ---------- Admonitions ---------- */
+.alert {
+  border-radius: var(--ifm-global-radius);
+  border-left-width: 4px;
+}
+
+/* ---------- Pagination nav ---------- */
+.pagination-nav__link {
+  border-radius: var(--ifm-global-radius);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pagination-nav__link:hover {
+  box-shadow: 0 2px 8px rgba(50, 108, 229, 0.15);
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.footer__title {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+}
+
+/* ---------- Category doc cards ---------- */
+.card {
+  border-radius: var(--ifm-global-radius) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(50, 108, 229, 0.12) !important;
+}
+
+[data-theme='dark'] .card:hover {
+  box-shadow: 0 6px 20px rgba(107, 159, 255, 0.15) !important;
 }

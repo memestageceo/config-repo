@@ -1,48 +1,324 @@
+/* =============================================
+   Homepage styles
+   ============================================= */
+
+/* ---- Hero ---- */
 .heroBanner {
-  padding: 4rem 0;
-  text-align: center;
   position: relative;
+  padding: 6rem 0 5rem;
+  text-align: center;
   overflow: hidden;
+  background: linear-gradient(150deg, #060d1f 0%, #0e2044 40%, #1a3a7a 75%, #2056c0 100%);
+  color: #fff;
 }
 
+.heroGlow {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 500px;
+  background: radial-gradient(ellipse at center, rgba(99, 155, 255, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Badge pill */
+.badge {
+  display: inline-block;
+  padding: 0.3rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(107, 159, 255, 0.4);
+  background: rgba(107, 159, 255, 0.1);
+  color: #c5d9ff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+
+/* Hero headline */
+.heroTitle {
+  font-size: clamp(2.2rem, 6vw, 4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.heroTitleAccent {
+  background: linear-gradient(90deg, #6b9fff 0%, #a78bfa 50%, #60c4ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.heroSubtitle {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 540px;
+  margin: 1rem auto 0;
+  line-height: 1.6;
+}
+
+/* CTA row */
 .buttons {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 2.25rem;
 }
 
+.btnPrimary {
+  background: #326ce5;
+  color: #fff !important;
+  border: none;
+  font-weight: 600;
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.btnPrimary:hover {
+  background: #1f5ed4;
+  color: #fff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(50, 108, 229, 0.45);
+  text-decoration: none;
+}
+
+.btnSecondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  font-weight: 600;
+  backdrop-filter: blur(8px);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btnSecondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff !important;
+  text-decoration: none;
+}
+
+/* Author note */
 .authorNote {
-  margin: 1.5rem auto 0;
-  max-width: 48rem;
-  opacity: 0.92;
+  margin: 1.75rem auto 0;
+  max-width: 480px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
 }
 
-.features {
-  padding: 3rem 0;
+.authorNote a {
+  color: #89b3ff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.featureCard {
-  margin-bottom: 1.5rem;
+/* ---- Stats strip ---- */
+.statsStrip {
+  background: var(--ifm-background-surface-color);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  padding: 1.25rem 0;
 }
 
-.featureLink {
-  text-decoration: none;
-  color: inherit;
+.statsRow {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
 }
 
-.featureLink:hover {
-  text-decoration: none;
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
 }
 
-.featureLink .card {
-  height: 100%;
-  transition: transform 0.2s, box-shadow 0.2s;
+.statValue {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--ifm-color-primary);
+  line-height: 1;
 }
 
-.featureLink:hover .card {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.statLabel {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ifm-color-emphasis-600);
+  font-weight: 600;
 }
+
+/* ---- Bento section ---- */
+.bentoSection {
+  padding: 4rem 0 3rem;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.sectionSubtitle {
+  font-size: 1.05rem;
+  color: var(--ifm-color-emphasis-600);
+  margin: 0;
+}
+
+/* Bento grid: 3 columns */
+.bentoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto;
+  gap: 1.25rem;
+}
+
+/* Base card */
+.bentoCard {
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  background: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+  text-decoration: none !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  border-top: 3px solid var(--ifm-color-primary);
+}
+
+.bentoCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(50, 108, 229, 0.14);
+  border-color: var(--ifm-color-primary-light);
+  color: var(--ifm-font-color-base);
+  text-decoration: none !important;
+}
+
+[data-theme='dark'] .bentoCard {
+  background: #161b27;
+  border-color: rgba(107, 159, 255, 0.12);
+}
+
+[data-theme='dark'] .bentoCard:hover {
+  box-shadow: 0 12px 32px rgba(107, 159, 255, 0.18);
+  border-color: rgba(107, 159, 255, 0.45);
+}
+
+/* Big card spans 2 columns */
+.bentoBig {
+  grid-column: span 2;
+}
+
+/* Blog CTA card — tinted accent */
+.bentoCta {
+  border-top-color: #a78bfa;
+  background: linear-gradient(135deg, var(--ifm-background-surface-color) 0%, rgba(167, 139, 250, 0.05) 100%);
+}
+
+[data-theme='dark'] .bentoCta {
+  background: linear-gradient(135deg, #161b27 0%, rgba(167, 139, 250, 0.08) 100%);
+}
+
+.bentoCta:hover {
+  box-shadow: 0 12px 32px rgba(167, 139, 250, 0.2) !important;
+  border-color: #a78bfa !important;
+}
+
+.bentoIcon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.bentoTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem !important;
+}
+
+.bentoDesc {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-700);
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+.bentoArrow {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+  margin-top: auto;
+}
+
+/* ---- Bottom CTA ---- */
+.bottomCta {
+  text-align: center;
+  padding: 4.5rem 0 5rem;
+  background: linear-gradient(160deg, #060d1f 0%, #0e2044 50%, #1a3a7a 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.bottomCta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 100%, rgba(99, 155, 255, 0.15) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.ctaTitle {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.ctaSubtitle {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 2rem;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .bentoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .bentoBig {
+    grid-column: span 1;
+  }
+
+  .statsRow {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 996px) and (min-width: 769px) {
+  .bentoGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bentoBig {
+    grid-column: span 2;
+  }
+}
+

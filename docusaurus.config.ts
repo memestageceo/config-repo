@@ -168,7 +168,7 @@ const config: Config = {
       copyright: `Copyright © ${new Date().getFullYear()} Aditya Raj. Built with Docusaurus.`,
     },
     prism: {
-      theme: prismThemes.github,
+      theme: prismThemes.dracula,
       darkTheme: prismThemes.dracula,
       additionalLanguages: ['bash', 'yaml', 'docker', 'python', 'json', 'ini'],
     },

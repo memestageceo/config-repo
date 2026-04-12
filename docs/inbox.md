@@ -2,9 +2,9 @@
 
 ## pv pvc & I
 
-Scenario	Command	Result
-PV stuck in Released	kubectl edit pv <name> → remove claimRef	Status: Available
-PVC stuck in Terminating	kubectl delete deployment <name> first	PVC can then delete
+Scenario Command	Result
+PV stuck in Released	kubectl edit pv name → remove claimRef	Status: Available
+PVC stuck in Terminating	kubectl delete deployment name first	PVC can then delete
 Need to reuse PV data	Remove claimRef + create new PVC	New PVC binds to existing PV
 
 ## gateway api
@@ -159,7 +159,7 @@ Using bitnami/kubectl image — exec into it and it works:
 kubectl get pod --token="$token" --server="https://kubernetes:443" --insecure-skip-tls-verify
 ```
 
-Reference: <https://chat.deepseek.com/a/chat/s/e6f2e853-5377-4b15-9e2c-2cd5553437d1>
+Reference: [seekchat](https://chat.deepseek.com/a/chat/s/e6f2e853-5377-4b15-9e2c-2cd5553437d1)
 
 ### Authorization
 
@@ -324,8 +324,8 @@ Two approaches for canary deployments:
 2. **Single service with replica ratio** — `stable.replicas=8`, `canary.replicas=2`, routing round-robin via one service
 
 Reference:
-- <https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#create-horiz…>
-- <https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-…>
+- https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#create-horiz…
+- https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-…
 
 ### Gateway API — Bullet Train Example
 
@@ -383,7 +383,7 @@ curl -sk https://bullet.train.io/travellers | jq
 
 ### Topology Spread Constraints
 
-Reference: <https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/>
+Reference: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
 
 Use to:
 - Distribute pods evenly across nodes/zones
@@ -441,7 +441,7 @@ Task: Create HPA `api-hpa` for deployment `api-deployment` in namespace `api`.
 
 > Note: Ignore errors about `requests_per_second` not being tracked in metrics-server.
 
-Reference: <https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/>
+Reference: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/
 
 ### Taints & Tolerations
 

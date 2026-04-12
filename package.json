@@ -19,6 +19,7 @@
     "@docusaurus/faster": "^3.10.0",
     "@docusaurus/preset-classic": "^3.10.0",
     "@docusaurus/theme-mermaid": "^3.10.0",
+    "@fontsource/jetbrains-mono": "^5.2.8",
     "@mdx-js/react": "^3.1.1",
     "clsx": "^2.1.1",
     "prism-react-renderer": "^2.4.1",
@@ -30,6 +31,7 @@
     "@docusaurus/tsconfig": "^3.10.0",
     "@docusaurus/types": "^3.10.0",
     "@easyops-cn/docusaurus-search-local": "^0.55.1",
+    "raw-loader": "^4.0.2",
     "typescript": "~6.0.2"
   },
   "engines": {

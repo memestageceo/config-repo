@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: stateful-app
+spec: {}
+status: {}
+
+---
+apiVersion: v1
+data:
+  CLUSTER_TOKEN: dG9rM24teHl6LTk5OTk=
+  JOIN_KEY: czNjdXIzLWpvaW4tazN5
+kind: Secret
+metadata:
+  name: cluster-secret
+  namespace: stateful-app
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: identity-sts
+  name: identity-sts
+  namespace: stateful-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: identity-sts
+  template:
+    metadata:
+      labels:
+        app: identity-sts
+    spec:
+      volumes:
+        - name: cluster-secret
+          secret:
+            secretName: cluster-secret
+        - name: shared
+          emptyDir: {}
+      initContainers:
+        - name: config-gen
+          image: busybox
+          command: ["sh", "-c"]
+          args:
+            - |-
+              NODE_CONF=/shared/node.conf
+              index="${MY_POD_NAME:(-1):1}"
+              echo "NODE_ID=$index" > $NODE_CONF
+              echo "NODE_NAME=$MY_POD_NAME" >> $NODE_CONF
+              echo "NAMESPACE=$MY_NAMESPACE" >> $NODE_CONF
+              echo "TOKEN=$(cat '/etc/cluster-secret/CLUSTER_TOKEN')" >> $NODE_CONF
+              echo "JOIN_KEY=$(cat '/etc/cluster-secret/JOIN_KEY')" >> $NODE_CONF
+          volumeMounts:
+            - name: cluster-secret
+              mountPath: /etc/cluster-secret
+            - name: shared
+              mountPath: /shared
+              readOnly: false
+          env:
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MY_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+      containers:
+      - image: busybox
+        name: node
+        command: ["sh", "-c", "cat /shared/node.conf; sleep 5000"]
+        volumeMounts:
+          - name: cluster-secret
+            mountPath: /etc/cluster-secret
+          - name: shared
+            mountPath: /shared
+            readOnly: true
+        resources: {}
+status: {}
