@@ -1,0 +1,16 @@
+{
+  // Apply to all markdown files
+  "globs": [
+    "**/*.md"
+  ],
+
+  // Use default rules with a few simple overrides
+  "config": {
+    "default": true,
+
+    // Example customizations
+    "MD013": false, // disable line length rule
+    "MD033": false, // allow inline HTML
+    "MD041": false  // first line doesn't need to be a top-level heading
+  }
+}

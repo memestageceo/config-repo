@@ -1,5 +1,12 @@
 # Kubernetes Notes
 
+## pv pvc & I
+
+Scenario	Command	Result
+PV stuck in Released	kubectl edit pv <name> → remove claimRef	Status: Available
+PVC stuck in Terminating	kubectl delete deployment <name> first	PVC can then delete
+Need to reuse PV data	Remove claimRef + create new PVC	New PVC binds to existing PV
+
 ## gateway api
 
 ```yaml
