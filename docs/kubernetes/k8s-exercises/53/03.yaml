@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: batch
+spec: {}
+status: {}
+
+---
+apiVersion: v1
+data:
+  FAILURE_THRESHOLD: "3"
+  WORK_UNITS: "10"
+kind: ConfigMap
+metadata:
+  name: job-config
+  namespace: batch
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: flaky-processor
+  namespace: batch
+spec:
+  backoffLimit: 4
+  completions: 1
+  template:
+    metadata: {}
+    spec:
+      containers:
+      - command:
+        - sh
+        - -c
+        args:
+          - |-
+            echo "Starting job on pod $MY_POD_NAME"
+            n=1
+            while [[ $n -le $WORK_UNITS ]]; do
+              echo "Processing unit $n"
+              sleep 0.5
+              n=$((n+1))
+            done
+            rando=$(($RANDOM%10))
+            if [[ $rando -le $FAILURE_THRESHOLD ]]; then
+              echo "FAILED: random=$rando"
+              exit 1
+            else
+              echo "SUCCESS: random=$rando"
+              exit 0
+            fi
+        image: busybox
+        name: flaky-processor
+        resources: {}
+        env:
+          - name: MY_POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+        envFrom:
+          - configMapRef:
+              name: job-config
+      restartPolicy: Never
+status: {}
