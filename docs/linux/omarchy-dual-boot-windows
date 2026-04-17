@@ -1,0 +1,115 @@
+---
+title: dual boot guide for Arch Linux and Windows
+tags: omarchy, windows
+---
+
+> Installing Omarchy after windows removed the windows entry completely from the bootloader. This got it back for me. It's useful if you had windows installed and then you install omarchy on a different disk/parition.
+
+## Overview
+
+| Drive | Device | Contents |
+|-------|--------|----------|
+| 465.8GB NVMe | `nvme0n1` | Arch/Omarchy — EFI partition (`p1`, 2GB) + encrypted root (`p2`) |
+| 931.5GB NVMe | `nvme1n1` | Windows — reserved (`p1`), C: (`p2`, 540GB), D: (`p3`, 390GB), Recovery (`p4`) |
+
+**EFI partition:** `nvme0n1p1`, mounted at `/boot` — shared by both OSes.
+
+---
+
+## Limine Config
+
+**Location:** `/boot/limine.conf`
+
+To add or edit boot entries, open it with:
+```bash
+sudo vim /boot/limine.conf
+```
+
+Changes take effect immediately on next boot — no update command needed.
+
+### Windows Entry (add at end of file)
+```
+/Windows
+  comment: Windows 11
+  protocol: efi
+  path: boot():/EFI/Microsoft/Boot/bootmgfw.efi
+```
+## If Windows Disappears from Boot Menu
+
+This happens if Limine reinstalls and overwrites `EFI/BOOT/BOOTX64.EFI`, wiping the Microsoft boot files.
+
+### 1. Verify Windows is intact
+```bash
+sudo mkdir /tmp/win
+sudo mount /dev/nvme1n1p2 /tmp/win
+ls /tmp/win   # should show Windows/, Users/, etc.
+```
+
+### 2. Create a Windows 11 USB with Ventoy
+```bash
+sudo pacman -S ventoy
+sudo ventoy -i /dev/sdX        # wipes USB, installs Ventoy
+sudo mount /dev/sdX1 /tmp/ventoy
+sudo cp ~/Downloads/Win11*.iso /tmp/ventoy/
+sudo umount /tmp/ventoy
+```
+Download the ISO from: https://microsoft.com/software-download/windows11
+
+### 3. Boot from USB → Repair your computer → Command Prompt
+
+#### Assign a letter to the EFI partition
+```cmd
+diskpart
+select disk 0          ← the 465GB Arch disk (nvme0n1)
+list partition
+select partition 1     ← the 2GB EFI partition
+assign letter=Z
+exit
+```
+
+#### Find the Windows drive letter
+```cmd
+dir C:\
+dir D:\
+```
+Keep trying until you see `Windows\`, `Users\`, `Program Files\`.
+
+#### Restore the bootloader
+```cmd
+bcdboot C:\Windows /s Z: /f UEFI
+```
+> Replace `C:` with whatever letter Windows was assigned
+
+You should see: **Boot files successfully created.**
+
+### 4. Back in Arch — re-add Windows to Limine
+```bash
+sudo vim /boot/limine.conf
+```
+Add the Windows entry from above, save, reboot.
+
+## Useful Commands
+
+```bash
+# View partition layout
+lsblk
+
+# Check EFI boot entries
+sudo efibootmgr
+
+# Scan for bootable OSes
+sudo os-prober          # needs: sudo pacman -S os-prober
+
+# Mount Windows partition (read-only due to hibernation)
+sudo mkdir /tmp/win
+sudo mount /dev/nvme1n1p2 /tmp/win
+
+# Scan Limine EFI entries
+sudo limine-scan
+```
+
+## Notes
+
+- **Windows hibernation:** Windows uses fast startup (hibernation) by default. To mount the NTFS partition read-write from Linux, you must fully shut down Windows (not just restart): `shutdown /s /t 0` from a Windows terminal.
+- **Limine auto-entries:** Omarchy uses `limine-entry-tool` to auto-generate kernel entries. Don't remove the auto-generated comments or the tool may duplicate entries.
+- **Snapshots:** The Limine config includes Btrfs snapshot entries managed by `limine-snapper-sync`. These are safe to ignore.
